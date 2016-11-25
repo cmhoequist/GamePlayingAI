@@ -21,16 +21,30 @@ public class Negamax {
     int oMoves = 0b000000000;
     int ultimateChoice = -1;
 
+    //Debugging
+    int depth = -1;
+    private final boolean DEBUG = true;
+
+    //Scoring
+    private int maxBitCount;
+    private int idealScore;
+
+    public Negamax(){
+        //Initialize maximum line score and maximum overall score
+        maxBitCount = 3;
+        idealScore = maxBitCount*winningPatterns.size();
+    }
+
     public int getMove(){
         Scanner scanner = new Scanner(System.in);
         //While isOver is 1, the game continues.
-        while(isOver() == 1){
+        while(!isOver()){
             if(currentPolarity == 1){
                 System.out.println("Enter a cell index: ");
                 ultimateChoice = scanner.nextInt();
             }
             else{
-                negamax(-1);
+                negamax(-1, 2);
             }
             System.out.println(currentPolarity +" moves to "+ ultimateChoice);
             setMove(getBinaryIndex(8- ultimateChoice), currentPolarity);
@@ -41,11 +55,13 @@ public class Negamax {
         return ultimateChoice;
     }
 
-    private int negamax(int polarity){
-        //An isOver algorithm closely resembles a getScore algorithm. Combined for convenience.
-        int score = isOver();
-        if(score != 1){
-            return polarity*score;
+    private int negamax(int polarity, int depth){
+        this.depth += 1;
+
+
+        if(isOver() || depth==0){
+            this.depth -= 1;
+            return score();
         }
 
         int max = Integer.MIN_VALUE;
@@ -65,10 +81,14 @@ public class Negamax {
                 setMove(thisBit, polarity);
 
                 //Evaluate the move
-                int outcome = -negamax(-1*polarity);
+                int outcome = -negamax(-1*polarity, depth-1);
                 if(outcome > max){
                     max = outcome;
                     depthChoice = index;
+                }
+
+                if(this.depth==0 && DEBUG){
+                    System.out.println("i="+index+", outcome="+outcome);
                 }
 
                 //Unset the move - use of XOR rather than OR guarantees toggling in either direction
@@ -76,6 +96,7 @@ public class Negamax {
             }
         }
         ultimateChoice = depthChoice;
+        this.depth -= 1;
         return max;
     }
 
@@ -92,18 +113,30 @@ public class Negamax {
         return new Double(Math.pow(2, index)).intValue();
     }
 
-    private int isOver(){
+    private int score(){
+        //Heuristic implementation
+        int player = currentPolarity == 1 ? xMoves : oMoves;
+        int opponent = player == xMoves ? oMoves : xMoves;
+        int totalScore = 0;
+
         for(int pattern : winningPatterns){
-            if((pattern & xMoves)==pattern){
-                return 100;
-            }
-            else if((pattern & oMoves)==pattern){
-                return -100;
+            int playerBits = pattern & player;
+            int opponentBits = pattern & opponent;
+            int bitDifference = Integer.bitCount(playerBits) - Integer.bitCount(opponentBits);
+            int score = Math.abs(bitDifference)==maxBitCount ? bitDifference*idealScore : bitDifference*maxBitCount;
+            totalScore += score;
+        }
+        return totalScore;
+    }
+
+    private boolean isOver(){
+        //If there is a winner, the game is over
+        for(int pattern : winningPatterns){
+            if((pattern & xMoves)==pattern || (pattern & oMoves)==pattern){
+                return true;
             }
         }
-        if((xMoves | oMoves) == 0b111111111){
-            return 0;
-        }
-        return 1;
+        //If all cells are occupied, the game is over
+        return (xMoves | oMoves) == 0b111111111;
     }
 }
