@@ -31,6 +31,8 @@ public abstract class GeneticAlgorithm {
     private static int populationSize;
     private static boolean DEBUG = true;
     private static int generationTracker = 0;
+    private static int evalThreshold = 10;
+    private static int targetInstructionLength;
 
     /**
      * Returns a map of chromosomes. Key values are used for weight lookup.
@@ -44,6 +46,7 @@ public abstract class GeneticAlgorithm {
             System.out.println("Generating population......\n");
         }
         populationSize = size;
+        targetInstructionLength = targetLength;
         rand = new Random();
         for(double i = 0.0; i < populationSize; ){
             Stack<Integer> alg = Generator.getRPNInstructions(targetLength);
@@ -62,7 +65,7 @@ public abstract class GeneticAlgorithm {
     }
 
     /**
-     * Each chromosome faces off against every other chromosome in two rounds of tic-tac-toe (one on each side to eliminate
+     * Each chromosome faces off against some number of other chromosomes in two rounds of tic-tac-toe (one on each side to eliminate
      * starting bias) and the result added to the competitors' fitness scores (weights).
      */
     public static void evaluatePopulation(){
@@ -72,15 +75,13 @@ public abstract class GeneticAlgorithm {
             System.out.println("Evaluating chromosomes.....");
         }
         for(double i = 0.0; i < population.size(); i++){
-            for(double j = i+1; j < population.size(); j++){
+            for(double j = i+1; j < evalThreshold; j++){
+                double randOpp = new Double(rand.nextInt(population.size()));
                 matchScore = 0;
-                matchScore += ttt.teach(population.get(i), population.get(j));
-                matchScore += ttt.teach(population.get(j), population.get(i));
+                matchScore += ttt.teach(population.get(i), population.get(randOpp));
+                matchScore += ttt.teach(population.get(randOpp), population.get(i));
                 weights.put(i, weights.get(i)+matchScore);
-                weights.put(j, weights.get(j)+(maxMatchScore - matchScore));
-            }
-            if(DEBUG){
-                System.out.println("Done evaluating chromosome #"+i);
+                weights.put(randOpp, weights.get(randOpp)+(maxMatchScore - matchScore));
             }
         }
         if(DEBUG){
@@ -101,23 +102,28 @@ public abstract class GeneticAlgorithm {
 
             //Crossover
             int limit = Math.min(fit1.size(), fit2.size());
+            boolean crossover = false;
             for(int i = 0; i < limit; i++){
-                //Assume crossover likelihood is gated by probability of two chromosomes having same opcode type at the same position
-                if(Utility.getCategory(fit1.get(i)) == Utility.getCategory(fit2.get(i))){
+                if(!crossover){
+                    if(rand.nextInt(new Double(crossoverRate*100).intValue()) < crossoverRate*100){
+                        crossover = true;
+                    }
+                }
+                else{
                     int temp = fit1.get(i);
                     fit1.set(i, fit2.get(i));
                     fit2.set(i, temp);
                 }
+
             }
 
             //Mutate
             mutate(fit1);
             mutate(fit2);
 
-            newPopulation.put(newKey, fit1);
-            newKey += 1;
-            newPopulation.put(newKey, fit2);
-            newKey += 1;
+            //Add to population
+            newKey = refresh(fit1, newPopulation, newKey);
+            newKey = refresh(fit2, newPopulation, newKey);
         }
 
         population = newPopulation;
@@ -125,6 +131,41 @@ public abstract class GeneticAlgorithm {
         if(DEBUG){
             System.out.println("Population evolved. Child generation #"+generationTracker+"\n");
         }
+    }
+
+    private static double refresh(Stack<Integer> fitalg, Map<Double, Stack<Integer>> newPop, double newKey){
+        if(popContains(fitalg, newPop)){
+            //If it's a fit algorithm but we already have it, mutate it heavily
+            if(rand.nextBoolean()){
+                fitalg = Generator.mutateInsanely(fitalg);
+            }
+            else{
+                fitalg = Generator.getRPNInstructions(targetInstructionLength);
+            }
+            newPop.put(newKey, fitalg);
+        }
+        else{
+            newPop.put(newKey, fitalg);
+        }
+        return newKey + 1;
+    }
+
+    private static boolean popContains(Stack<Integer> algorithm, Map<Double, Stack<Integer>> pop){
+        boolean outcome = false;
+        for(double i = 0.0; i < pop.size(); i++){
+            if(algorithm.size() == pop.get(i).size()){
+                outcome = true;
+                for(int j = 0; j < algorithm.size(); j++){
+                    if(algorithm.get(j) != pop.get(i).get(j)){
+                        outcome = false;
+                    }
+                }
+                if(outcome){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private static void mutate(Stack<Integer> algorithm){

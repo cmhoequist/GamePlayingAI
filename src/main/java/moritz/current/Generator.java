@@ -96,7 +96,9 @@ public abstract class Generator {
         targetCount = 20;
         if(il.size() > 2*targetCount){
             for(int i = 0; i < il.size(); i++){
-                il.set(i, Utility.getRandomMutation(il.get(i)));
+                if(rand.nextBoolean()){
+                    il.set(i, Utility.getRandomMutation(il.get(i)));
+                }
             }
             return il;
         }

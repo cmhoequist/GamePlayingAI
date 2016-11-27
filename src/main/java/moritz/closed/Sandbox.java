@@ -1,5 +1,7 @@
 package moritz.closed;
 
+import moritz.current.Utility;
+
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Random;
@@ -16,17 +18,23 @@ public class Sandbox {
     private static int[] sampleInstructions = {0b01010, 0b11101, 0b01100, 0b01010, 0b00100, 0b11101};
 
     public static void main(String[] args) {
-        Stack<Integer> ints = new Stack<>();
-        IntStream.range(0,5).forEach(i -> {
-           ints.add(i);
-        });
-
-        for(Integer e : ints){
-            System.out.println(e);
+        Utility.initialize();
+        Stack<Integer> example1 = new Stack<>();
+        Stack<Integer> example2 = new Stack<>();
+//        String str1 = "idealscore playermap wpattern oppmap playermap oppmap wpattern | bitcount maxlinebits playermap oppmap wpattern 10 wpattern wpattern 10 + - @ / playermap wpattern oppmap wpattern oppmap playermap wpattern wpattern playermap oppmap oppmap playermap oppmap wpattern oppmap oppmap playermap oppmap wpattern oppmap wpattern wpattern oppmap wpattern wpattern playermap playermap wpattern oppmap oppmap playermap wpattern wpattern wpattern playermap playermap playermap oppmap oppmap playermap oppmap playermap playermap oppmap oppmap oppmap wpattern wpattern oppmap wpattern wpattern wpattern playermap oppmap wpattern oppmap playermap oppmap oppmap wpattern playermap wpattern wpattern wpattern playermap playermap playermap playermap wpattern oppmap wpattern wpattern oppmap wpattern wpattern playermap oppmap oppmap wpattern oppmap playermap playermap idealscore playermap wpattern oppmap playermap oppmap wpattern | bitcount maxlinebits playermap oppmap wpattern 10 wpattern wpattern 10 + - @ / playermap wpattern oppmap wpattern oppmap playermap wpattern wpattern playermap oppmap oppmap playermap oppmap wpattern oppmap oppmap playermap oppmap wpattern oppmap wpattern wpattern oppmap wpattern wpattern playermap playermap wpattern oppmap oppmap playermap wpattern wpattern wpattern playermap playermap playermap oppmap oppmap playermap oppmap playermap playermap oppmap oppmap oppmap wpattern wpattern oppmap wpattern wpattern wpattern playermap oppmap wpattern oppmap playermap oppmap oppmap wpattern playermap wpattern wpattern wpattern playermap playermap playermap playermap wpattern oppmap wpattern wpattern oppmap wpattern wpattern playermap oppmap oppmap wpattern oppmap playermap playermap";
+        String str1 = "playermap wpattern ^ bitcount oppmap";
+        String str2 = "playermap wpattern ^ bitcount oppmap";
+        String[] labels1 = str1.split(" ");
+        String[] labels2 = str2.split(" ");
+        for(String label : labels1){
+            System.out.println("Symbol: "+label);
+            example1.add(Utility.labelToOpcode(label));
+        }
+        for(String label : labels2){
+            example2.add(Utility.labelToOpcode(label));
         }
 
-        Random rand = new Random();
-        System.out.println(rand.nextInt(0));
+        System.out.println(labels1.equals(labels2));
     }
 
     public static int getLengthWithLeadingZeros(int algorithm){

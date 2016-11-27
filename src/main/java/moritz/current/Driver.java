@@ -17,8 +17,8 @@ public class Driver {
     }
 
     public static void geneticAlg(){
-        int cohortSize = 100;
-        int generations = 100;
+        int cohortSize = 1000;
+        int generations = 150;
         GeneticAlgorithm.getPopulation(cohortSize, 20, 3);
 
         for(int i = 0; i < generations; i++){
@@ -27,15 +27,19 @@ public class Driver {
         }
 
         GeneticAlgorithm.evaluatePopulation();
-        System.out.print("Algorithms: ");
-        for(double i = 0 ; i < cohortSize; i++){
-            GeneticAlgorithm.getSampleChromosome(i).stream().forEach(e -> System.out.print(Utility.opcodeToLabel(e)+" "));
-            System.out.println();
-        }
+        System.out.println("Best 15--------------------");
+        GeneticAlgorithm.getWeightedChromosomes().entrySet().stream()
+                .sorted((e1, e2) -> Double.compare(e2.getKey(), e1.getKey()))
+                .limit(15)
+                .forEach(e -> {
+                   System.out.print("K: "+e.getKey());
+                    System.out.print(", ");
+                    e.getValue().forEach(v -> System.out.print(Utility.opcodeToLabel(v)+" "));
+                    System.out.println();
+                });
 
         Map<Integer,Stack<Integer>> writeAlgs = GeneticAlgorithm.getWeightedChromosomes();
         Utility.writeToFile("algs.txt",writeAlgs);
-        Map<Integer,Stack<Integer>> readalgs = Utility.readFromFile("algs.txt");
 
     }
 
