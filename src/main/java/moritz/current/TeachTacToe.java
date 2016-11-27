@@ -49,7 +49,7 @@ public class TeachTacToe {
         if(winner == 0){
             return 1;
         }
-        return currentPolarity == 1 ? 3 : 0;
+        return currentPolarity == 1 ? 2 : 0;
     }
 
     public void setDebug(boolean newval){

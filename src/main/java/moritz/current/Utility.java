@@ -1,6 +1,10 @@
 package moritz.current;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Moritz on 11/27/2016.
@@ -81,7 +85,53 @@ public abstract class Utility {
         for(int i = 0; i < data.length; i++){
             dataTable.put(stringMap.get(dataStrings[i]), data[i]);
         }
+        Generator.initialize();
     }
+
+    /**
+     * Chromosome delimiter: '\n'
+     * Weight/Instructions delimiter: ','
+     * Instruction delimiter: ' '
+     */
+    public static void writeToFile(String filename, Map<Integer,Stack<Integer>> weightedAlgs){
+        try(FileWriter writer = new FileWriter(new File(filename))){
+            StringBuilder sb = new StringBuilder();
+            for(Map.Entry<Integer,Stack<Integer>> weightEntry : weightedAlgs.entrySet()){
+                sb.append(weightEntry.getKey()).append(",");
+                for(Integer opcode : weightEntry.getValue()){
+                    sb.append(opcode).append(" ");
+                }
+                sb.setLength(sb.length() - 1); //Truncate final space
+                sb.append("\n");
+                writer.write(sb.toString());
+                sb.setLength(0); //Clear
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static Map<Integer, Stack<Integer>> readFromFile(String filename){
+        Map<Integer, Stack<Integer>> weightedInstructions = new HashMap<>();
+        try(Scanner scanner = new Scanner(new File(filename))){
+            String[] line, instructions;
+            int weight;
+            while(scanner.hasNextLine()){
+                Stack<Integer> stack = new Stack<>();
+                line = scanner.nextLine().split(",");
+                weight = Integer.parseInt(line[0]);
+                instructions = line[1].split(" ");
+                for(String opcode : instructions){
+                    stack.add(Integer.parseInt(opcode));
+                }
+                weightedInstructions.put(weight, stack);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return weightedInstructions;
+    }
+
 
     private static int updateTables(int binLabel, String label, List<Integer> elementList, int category){
         bitMap.put(binLabel, label);
@@ -156,8 +206,18 @@ public abstract class Utility {
         return unoperators.get(rand.nextInt(unoperators.size()));
     }
 
+    public static int getRandomXUnop(int dedup){
+        List<Integer> validInts = bitData.stream().filter(e -> e != dedup).collect(Collectors.toList());
+        return validInts.size() > 0 ? validInts.get(rand.nextInt(validInts.size())) : 0;
+    }
+
     public static int getRandomBitData(){
         return bitData.get(rand.nextInt(bitData.size()));
+    }
+
+    public static int getXORandomBitData(int dedup){
+        List<Integer> validInts = bitData.stream().filter(e -> e != dedup).collect(Collectors.toList());
+        return validInts.get(rand.nextInt(validInts.size()));
     }
 
     public static int getRandomBitnop(){

@@ -6,7 +6,7 @@ import java.util.*;
  * Created by Moritz on 11/27/2016.
  * <p></p>
  */
-public class GeneticAlgorithm {
+public abstract class GeneticAlgorithm {
     /*
     At the beginning of a run of a genetic algorithm a large population of random chromosomes is created.
     Each one, when decoded will represent a different solution to the problem at hand.
@@ -23,11 +23,11 @@ public class GeneticAlgorithm {
 
     private static Map<Double, Stack<Integer>> population = new HashMap<>();
     private static Map<Double, Integer> weights = new HashMap<>();
-    private static int maxMatchScore = 6; //3 for a win, 1 for a tie, 0 for a loss. Match = 2 rounds.
+    private static int maxMatchScore = 4; //2 for a win, 1 for a tie, 0 for a loss. Match = 2 rounds.
     private static Random rand;
     private static int rouletteCounter = 0;
     private static final double crossoverRate = 0.5;
-    private static final double mutationRate = 0.001;
+    private static final double mutationRate = 0.01;
     private static int populationSize;
     private static boolean DEBUG = true;
     private static int generationTracker = 0;
@@ -45,9 +45,8 @@ public class GeneticAlgorithm {
         }
         populationSize = size;
         rand = new Random();
-        Generator sg = new Generator(); //Must initialize before parser (included in TTT)
         for(double i = 0.0; i < populationSize; ){
-            Stack<Integer> alg = sg.getRPNInstructions(targetLength);
+            Stack<Integer> alg = Generator.getRPNInstructions(targetLength);
             if(alg.size() > minLength){
                 population.put(i, alg);
                 weights.put(i, 0);
@@ -112,16 +111,8 @@ public class GeneticAlgorithm {
             }
 
             //Mutate
-            for(int i = 0; i < fit1.size(); i++){
-                if(rand.nextInt(1000) < new Double(mutationRate*1000).intValue()){
-                    fit1.set(i, Utility.getRandomMutation(fit1.get(i)));
-                }
-            }
-            for(int i = 0; i < fit2.size(); i++){
-                if(rand.nextInt(1000) < new Double(mutationRate*1000).intValue()){
-                    fit2.set(i, Utility.getRandomMutation(fit2.get(i)));
-                }
-            }
+            mutate(fit1);
+            mutate(fit2);
 
             newPopulation.put(newKey, fit1);
             newKey += 1;
@@ -136,13 +127,26 @@ public class GeneticAlgorithm {
         }
     }
 
+    private static void mutate(Stack<Integer> algorithm){
+        for(int i = 0; i < algorithm.size(); i++){
+            if(rand.nextInt(1000) < new Double(mutationRate*1000).intValue()){
+                if(rand.nextInt(10) < 1){
+                    algorithm = Generator.mutateInsanely(algorithm);
+                }
+                else{
+                    algorithm.set(i, Utility.getRandomMutation(algorithm.get(i)));
+                }
+            }
+        }
+    }
+
     public static double selectFitAlgorithm(double current){
         int totalWeight = weights.values().stream().reduce(0, Integer::sum);
 
         int roulette = rand.nextInt(totalWeight);
         for(Map.Entry<Double, Integer> e : weights.entrySet()){
             rouletteCounter += e.getValue();
-            if(rouletteCounter >= roulette && e.getKey() != current){   //Make sure we don't randomly select the same alg twice
+            if(rouletteCounter >= roulette){
                 rouletteCounter = 0;
                 return e.getKey();
             }
@@ -150,6 +154,7 @@ public class GeneticAlgorithm {
         try {
             throw new Exception("Inexplicably, the sum of all weights is strictly less than the sum of all weights.");
         } catch (Exception e) {
+            System.out.println("Counter vs size: "+rouletteCounter+", "+totalWeight);
             e.printStackTrace();
         }
         return -1;
@@ -166,5 +171,12 @@ public class GeneticAlgorithm {
 
     public static Stack<Integer> getSampleChromosome(double index){
         return population.get(index);
+    }
+
+    public static Map<Integer, Stack<Integer>> getWeightedChromosomes() {
+        Map<Integer, Stack<Integer>> outcome = new HashMap<>();
+        weights.entrySet().stream().sorted((e1, e2) -> Integer.compare(e1.getValue(), e2.getValue()))
+                                   .forEach(entry -> outcome.put(entry.getValue(), population.get(entry.getKey())));
+        return outcome;
     }
 }

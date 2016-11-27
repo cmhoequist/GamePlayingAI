@@ -2,6 +2,7 @@ package moritz.current;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 /**
@@ -12,13 +13,15 @@ public class Driver {
     public static void main(String[] args){
         Utility.initialize();
         geneticAlg();
+//        testManual();
     }
 
     public static void geneticAlg(){
-        int cohortSize = 50;
+        int cohortSize = 100;
+        int generations = 100;
         GeneticAlgorithm.getPopulation(cohortSize, 20, 3);
 
-        for(int i = 0; i < 5; i++){
+        for(int i = 0; i < generations; i++){
             GeneticAlgorithm.evaluatePopulation();
             GeneticAlgorithm.evolvePopulation();
         }
@@ -30,26 +33,28 @@ public class Driver {
             System.out.println();
         }
 
+        Map<Integer,Stack<Integer>> writeAlgs = GeneticAlgorithm.getWeightedChromosomes();
+        Utility.writeToFile("algs.txt",writeAlgs);
+        Map<Integer,Stack<Integer>> readalgs = Utility.readFromFile("algs.txt");
 
     }
 
     public static void testManual(){
-        Generator sg = new Generator(); //Must initialize before parser (included in TTT)
+//        Generator sg = new Generator(); //Must initialize before parser (included in TTT)
         TeachTacToe ttt = new TeachTacToe();
         Stack<Integer> example1 = new Stack<>();
-        example1.add(Utility.labelToOpcode("abs"));
-        example1.add(Utility.labelToOpcode("10"));
-        example1.add(Utility.labelToOpcode("abs"));
-        example1.add(Utility.labelToOpcode("*"));
-        example1.add(Utility.labelToOpcode("maxlinebits"));
-        example1.add(Utility.labelToOpcode("-"));
         Stack<Integer> example2 = new Stack<>();
-        example2.add(Utility.labelToOpcode("wpattern"));
-        example2.add(Utility.labelToOpcode("bitcount"));
-        example2.add(Utility.labelToOpcode("10"));
-        example2.add(Utility.labelToOpcode("idealscore"));
-        example2.add(Utility.labelToOpcode("+"));
-        example2.add(Utility.labelToOpcode("+"));
+        String str1 = "idealscore playermap wpattern oppmap playermap oppmap wpattern | bitcount maxlinebits playermap oppmap wpattern 10 wpattern wpattern 10 + - @ / playermap wpattern oppmap wpattern oppmap playermap wpattern wpattern playermap oppmap oppmap playermap oppmap wpattern oppmap oppmap playermap oppmap wpattern oppmap wpattern wpattern oppmap wpattern wpattern playermap playermap wpattern oppmap oppmap playermap wpattern wpattern wpattern playermap playermap playermap oppmap oppmap playermap oppmap playermap playermap oppmap oppmap oppmap wpattern wpattern oppmap wpattern wpattern wpattern playermap oppmap wpattern oppmap playermap oppmap oppmap wpattern playermap wpattern wpattern wpattern playermap playermap playermap playermap wpattern oppmap wpattern wpattern oppmap wpattern wpattern playermap oppmap oppmap wpattern oppmap playermap playermap idealscore playermap wpattern oppmap playermap oppmap wpattern | bitcount maxlinebits playermap oppmap wpattern 10 wpattern wpattern 10 + - @ / playermap wpattern oppmap wpattern oppmap playermap wpattern wpattern playermap oppmap oppmap playermap oppmap wpattern oppmap oppmap playermap oppmap wpattern oppmap wpattern wpattern oppmap wpattern wpattern playermap playermap wpattern oppmap oppmap playermap wpattern wpattern wpattern playermap playermap playermap oppmap oppmap playermap oppmap playermap playermap oppmap oppmap oppmap wpattern wpattern oppmap wpattern wpattern wpattern playermap oppmap wpattern oppmap playermap oppmap oppmap wpattern playermap wpattern wpattern wpattern playermap playermap playermap playermap wpattern oppmap wpattern wpattern oppmap wpattern wpattern playermap oppmap oppmap wpattern oppmap playermap playermap";
+        String str2 = "playermap wpattern ^ bitcount oppmap";
+        String[] labels1 = str1.split(" ");
+        String[] labels2 = str2.split(" ");
+        for(String label : labels1){
+            System.out.println("Symbol: "+label);
+            example1.add(Utility.labelToOpcode(label));
+        }
+        for(String label : labels2){
+            example2.add(Utility.labelToOpcode(label));
+        }
         Parser exampleparser = new Parser();
         System.out.println("Example1: "+example1+", "+exampleparser.score(example1));
         System.out.println("Example2: "+example2+", "+exampleparser.score(example2));
@@ -71,14 +76,14 @@ public class Driver {
 
 
     public static void singleGenFilter(){
-        Generator sg = new Generator(); //Must initialize before parser (included in TTT)
+//        Generator sg = new Generator(); //Must initialize before parser (included in TTT)
         TeachTacToe ttt = new TeachTacToe();
         List<Stack<Integer>> algorithms = new ArrayList<>();
         boolean sentinel = true;
         while(sentinel){
             algorithms.clear();
             while(algorithms.size() < 2){
-                Stack<Integer> alg = sg.getRPNInstructions(8);
+                Stack<Integer> alg = Generator.getRPNInstructions(8);
                 if(alg.size() > 3){
                     algorithms.add(alg);
                     System.out.print("alg"+algorithms.size()+": ");
