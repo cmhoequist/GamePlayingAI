@@ -1,4 +1,4 @@
-package moritz.experimental;
+package moritz.closed;
 
 import java.util.Arrays;
 import java.util.Scanner;

@@ -1,4 +1,4 @@
-package moritz.core;
+package moritz.current;
 
 /**
  * Created by Moritz on 11/26/2016.

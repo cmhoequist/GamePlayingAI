@@ -1,4 +1,4 @@
-package moritz.core;
+package moritz.current;
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ public class GeneticAlgorithm {
         }
         populationSize = size;
         rand = new Random();
-        StringGenerator sg = new StringGenerator(); //Must initialize before parser (included in TTT)
+        Generator sg = new Generator(); //Must initialize before parser (included in TTT)
         for(double i = 0.0; i < populationSize; ){
             Stack<Integer> alg = sg.getRPNInstructions(targetLength);
             if(alg.size() > minLength){
@@ -89,7 +89,7 @@ public class GeneticAlgorithm {
         }
     }
 
-    public static void evolvePopulation(StringGenerator seed){
+    public static void evolvePopulation(Generator seed){
         Map<Double, Stack<Integer>> newPopulation = new HashMap<>();
         if(DEBUG){
             System.out.println("Evolving population.....");
@@ -113,12 +113,12 @@ public class GeneticAlgorithm {
             //Mutate
             for(int i = 0; i < fit1.size(); i++){
                 if(rand.nextInt(1000) < new Double(mutationRate*1000).intValue()){
-                    fit1.set(i, seed.getRandomMutation(rand.nextInt(3)));
+                    fit1.set(i, seed.getRandomMutation());
                 }
             }
             for(int i = 0; i < fit2.size(); i++){
                 if(rand.nextInt(1000) < new Double(mutationRate*1000).intValue()){
-                    fit2.set(i, seed.getRandomMutation(rand.nextInt(3)));
+                    fit2.set(i, seed.getRandomMutation());
                 }
             }
 

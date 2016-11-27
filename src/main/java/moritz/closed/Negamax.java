@@ -1,62 +1,15 @@
-package moritz.core;
+package moritz.closed;
 
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.Stack;
 import java.util.stream.Collectors;
 
 /**
- * Created by Moritz on 11/26/2016.
+ * Created by Moritz on 11/25/2016.
  * <p></p>
  */
-public class TeachTacToe {
-    private int winner = 0;
-    ParseRPN scorer = new ParseRPN();
-    Stack<Integer> alg1, alg2;
-
-    /**
-     * Returns 2 if alg1 won, 1 if tie, and 0 if alg1 lost.
-     * @param alg1
-     * @param alg2
-     * @return
-     */
-    public int teach(Stack<Integer> alg1, Stack<Integer> alg2){
-        clearState();
-        this.alg1 = alg1;
-        this.alg2 = alg2;
-
-        if(DEBUG){
-            System.out.println("Init alg1: "+alg1);
-            System.out.println("Init alg2: "+alg2);
-        }
-
-        while(!isOver()){
-            negamax(currentPolarity, 2);
-            setMove(getBinaryIndex(8- ultimateChoice), currentPolarity);
-            if(DEBUG){
-                System.out.println(currentPolarity +" moves to "+ ultimateChoice);
-                System.out.println(currentPolarity+": "+ Integer.toBinaryString(currentPolarity==1 ? xMoves : oMoves));
-            }
-
-            currentPolarity *= -1;
-        }
-
-        //Reset for winner determination
-        winner = 0;
-        isOver();
-
-        currentPolarity *= -1;
-        if(winner == 0){
-            return 1;
-        }
-        return currentPolarity == 1 ? 5 : 0;
-    }
-
-    public void setDebug(boolean newval){
-        DEBUG = newval;
-    }
-
+public class Negamax {
     private int[] patterns = {
             0b111000000, 0b000111000, 0b000000111, // rows
             0b100100100, 0b010010010, 0b001001001, // cols
@@ -70,29 +23,41 @@ public class TeachTacToe {
 
     //Debugging
     int depth = -1;
-    private boolean DEBUG = false;
+    private final boolean DEBUG = true;
 
     //Scoring
     private int maxLineBits;
     private int idealScore;
 
-    public TeachTacToe(){
+    public Negamax(){
         //Initialize maximum line score and maximum overall score
         maxLineBits = 3;
         idealScore = maxLineBits*winningPatterns.size();
     }
 
-    private void clearState(){
-        winner = 0;
-        currentPolarity = 1;
-        xMoves = 0b000000000;
-        oMoves = 0b000000000;
-        ultimateChoice = -1;
-        depth = -1;
+    public int getMove(){
+        Scanner scanner = new Scanner(System.in);
+        //While isOver is 1, the game continues.
+        while(!isOver()){
+            if(currentPolarity == 1){
+                System.out.println("Enter a cell index: ");
+                ultimateChoice = scanner.nextInt();
+            }
+            else{
+                negamax(-1, 2);
+            }
+            System.out.println(currentPolarity +" moves to "+ ultimateChoice);
+            setMove(getBinaryIndex(8- ultimateChoice), currentPolarity);
+            System.out.println("x(1): " + Integer.toBinaryString(xMoves));
+            System.out.println("o(-1): " + Integer.toBinaryString(oMoves));
+            currentPolarity *= -1;
+        }
+        return ultimateChoice;
     }
 
     private int negamax(int polarity, int depth){
         this.depth += 1;
+
 
         if(isOver() || depth==0){
             this.depth -= 1;
@@ -122,9 +87,9 @@ public class TeachTacToe {
                     depthChoice = index;
                 }
 
-//                if(this.depth==0 && DEBUG){
-//                    System.out.println("i="+index+", outcome="+outcome);
-//                }
+                if(this.depth==0 && DEBUG){
+                    System.out.println("i="+index+", outcome="+outcome);
+                }
 
                 //Unset the move - use of XOR rather than OR guarantees toggling in either direction
                 setMove(thisBit, polarity);
@@ -149,21 +114,17 @@ public class TeachTacToe {
     }
 
     private int score(){
+        //Heuristic implementation
+        int player = currentPolarity == 1 ? xMoves : oMoves;
+        int opponent = player == xMoves ? oMoves : xMoves;
         int totalScore = 0;
-        ParseRPN parser = new ParseRPN();
+
         for(int pattern : winningPatterns){
-            scorer.setWinPattern(pattern);
-            if(currentPolarity == 1){
-                scorer.setPlayerState(xMoves);
-                scorer.setOpponentState(oMoves);
-            }
-            else{
-                scorer.setPlayerState(oMoves);
-                scorer.setOpponentState(xMoves);
-            }
-//            System.out.println("Example1: "+alg1+", "+parser.score(alg1));
-//            System.out.println("Example2: "+alg2+", "+parser.score(alg2));
-            totalScore += scorer.score(currentPolarity == 1 ? alg1 : alg2);
+            int playerBits = pattern & player;
+            int opponentBits = pattern & opponent;
+            int bitDifference = Integer.bitCount(playerBits) - Integer.bitCount(opponentBits);
+            int score = bitDifference*new Double(Math.pow(10, Math.abs(bitDifference))).intValue();
+            totalScore += score;
         }
         return totalScore;
     }
@@ -171,18 +132,7 @@ public class TeachTacToe {
     private boolean isOver(){
         //If there is a winner, the game is over
         for(int pattern : winningPatterns){
-            if((pattern & xMoves)==pattern){
-//                if(depth<= 0 && DEBUG){
-//                    System.out.println("WINNER1");
-//                }
-                winner = 1;
-                return true;
-            }
-            else if((pattern & oMoves)==pattern){
-//                if(depth<= 0 && DEBUG){
-//                    System.out.println("WINNER-1");
-//                }
-                winner = -1;
+            if((pattern & xMoves)==pattern || (pattern & oMoves)==pattern){
                 return true;
             }
         }
