@@ -10,11 +10,63 @@ import java.util.Stack;
  */
 public class Driver {
     public static void main(String[] args){
-        fitnessFilter();
+        testManual();
+    }
+
+    public static void geneticAlg(){
+        StringGenerator sg = new StringGenerator(); //Must initialize before parser (included in TTT)
+        GeneticAlgorithm.getPopulation(100, 8, 3);
+
+        for(int i = 0; i < 10; i++){
+            GeneticAlgorithm.evaluatePopulation();
+            GeneticAlgorithm.evolvePopulation(sg);
+        }
+
+        GeneticAlgorithm.evaluatePopulation();
+        Stack<Integer> fit1 = GeneticAlgorithm.getBest();
+        System.out.print("Champion: ");
+        fit1.stream().forEach(e -> System.out.print(sg.getLabel(e)+" "));
+        System.out.println();
+    }
+
+    public static void testManual(){
+        StringGenerator sg = new StringGenerator(); //Must initialize before parser (included in TTT)
+        TeachTacToe ttt = new TeachTacToe();
+        Stack<Integer> example1 = new Stack<>();
+        example1.add(StringGenerator.getStringMap().get("abs"));
+        example1.add(StringGenerator.getStringMap().get("10"));
+        example1.add(StringGenerator.getStringMap().get("abs"));
+        example1.add(StringGenerator.getStringMap().get("*"));
+        example1.add(StringGenerator.getStringMap().get("maxlinebits"));
+        example1.add(StringGenerator.getStringMap().get("-"));
+        Stack<Integer> example2 = new Stack<>();
+        example2.add(StringGenerator.getStringMap().get("wpattern"));
+        example2.add(StringGenerator.getStringMap().get("bitcount"));
+        example2.add(StringGenerator.getStringMap().get("10"));
+        example2.add(StringGenerator.getStringMap().get("idealscore"));
+        example2.add(StringGenerator.getStringMap().get("+"));
+        example2.add(StringGenerator.getStringMap().get("+"));
+        ParseRPN exampleparser = new ParseRPN();
+        System.out.println("Example1: "+example1+", "+exampleparser.score(example1));
+        System.out.println("Example2: "+example2+", "+exampleparser.score(example2));
+        ttt.setDebug(true);
+        int winner = ttt.teach(example1, example2);
+        if(winner == 1){
+            System.out.println("TIE");
+        }
+        else if(winner > 0){
+            System.out.println("EXPECTED");
+            example1.stream().forEach(e -> System.out.print(sg.getLabel(e)+" "));
+        }
+        else{
+            System.out.println("UPSET");
+            example2.stream().forEach(e -> System.out.print(sg.getLabel(e)+" "));
+        }
+//        winner.stream().forEach(e -> System.out.print(sg.getLabel(e)+" "));
     }
 
 
-    public static void fitnessFilter(){
+    public static void singleGenFilter(){
         StringGenerator sg = new StringGenerator(); //Must initialize before parser (included in TTT)
         TeachTacToe ttt = new TeachTacToe();
         List<Stack<Integer>> algorithms = new ArrayList<>();
@@ -33,17 +85,17 @@ public class Driver {
 
             int[] winners = new int[2];
             for(int i = 0; i < 2; i++){
-                Stack<Integer> winner = ttt.teach(algorithms.get(0+i), algorithms.get(1-i));
-                if(!winner.equals(algorithms.get(0))){
+//                Stack<Integer> winner = ttt.teach(algorithms.get(0+i), algorithms.get(1-i));
+//                if(!winner.equals(algorithms.get(0))){
 //                winner.stream().forEach(e -> System.out.print(sg.getLabel(e)+" "));
 //                System.out.println("\nDNE");
 //                algorithms.get(0).stream().forEach(e -> System.out.print(sg.getLabel(e)+" "));
-                    winners[i] = 0;
-                }
-                else{
+//                    winners[i] = 0;
+//                }
+//                else{
 //                System.out.println("Winner x");
-                    winners[i] = 1;
-                }
+//                    winners[i] = 1;
+//                }
             }
 
             if(winners[0] == winners[1]){
@@ -59,7 +111,7 @@ public class Driver {
 
     }
 
-    public static void debug(){
+    public static void debugInitial(){
         StringGenerator sg = new StringGenerator(); //Must initialize before parser (included in TTT)
         TeachTacToe ttt = new TeachTacToe();
         Stack<Integer> example1 = new Stack<>();
@@ -79,7 +131,7 @@ public class Driver {
         ParseRPN exampleparser = new ParseRPN();
         System.out.println("Example1: "+example1+", "+exampleparser.score(example1));
         System.out.println("Example2: "+example2+", "+exampleparser.score(example2));
-        Stack<Integer> winner = ttt.teach(example1, example2);
-        winner.stream().forEach(e -> System.out.print(sg.getLabel(e)+" "));
+//        Stack<Integer> winner = ttt.teach(example1, example2);
+//        winner.stream().forEach(e -> System.out.print(sg.getLabel(e)+" "));
     }
 }

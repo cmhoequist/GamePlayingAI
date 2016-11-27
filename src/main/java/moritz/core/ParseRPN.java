@@ -19,6 +19,7 @@ public class ParseRPN {
     private static String[] dataStrings = {"maxlinebits","idealscore","playermap","oppmap","wpattern","2","10"};
     private static int[] sampleData = {3, 24, 0b000011100, 0b001100001, 0b111000000, 2, 10};
     private Map<String, Integer> stringMap = StringGenerator.getStringMap();
+    private final boolean DEBUG = false;
 
     public ParseRPN(){
         binopTable.put(stringMap.get("&"), (playerBits, refBits) -> refBits & playerBits);
@@ -84,10 +85,13 @@ public class ParseRPN {
             }
 
         }
-        try {
-            throw new Exception("Invalid instruction stack");
-        } catch (Exception e) {
-            e.printStackTrace();
+        //If we've made it here, a garbage mutation has been introduced somewhere along the line. That's fine.
+        if(DEBUG){
+            try {
+                throw new Exception("Invalid instruction stack");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return 0;
     }

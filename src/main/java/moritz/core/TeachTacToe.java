@@ -14,7 +14,14 @@ public class TeachTacToe {
     private int winner = 0;
     ParseRPN scorer = new ParseRPN();
     Stack<Integer> alg1, alg2;
-    public Stack<Integer> teach(Stack<Integer> alg1, Stack<Integer> alg2){
+
+    /**
+     * Returns 2 if alg1 won, 1 if tie, and 0 if alg1 lost.
+     * @param alg1
+     * @param alg2
+     * @return
+     */
+    public int teach(Stack<Integer> alg1, Stack<Integer> alg2){
         clearState();
         this.alg1 = alg1;
         this.alg2 = alg2;
@@ -41,9 +48,13 @@ public class TeachTacToe {
 
         currentPolarity *= -1;
         if(winner == 0){
-            return null;
+            return 1;
         }
-        return currentPolarity == 1 ? alg1 : alg2;
+        return currentPolarity == 1 ? 5 : 0;
+    }
+
+    public void setDebug(boolean newval){
+        DEBUG = newval;
     }
 
     private int[] patterns = {
@@ -59,7 +70,7 @@ public class TeachTacToe {
 
     //Debugging
     int depth = -1;
-    private final boolean DEBUG = false;
+    private boolean DEBUG = false;
 
     //Scoring
     private int maxLineBits;
@@ -111,9 +122,9 @@ public class TeachTacToe {
                     depthChoice = index;
                 }
 
-                if(this.depth==0 && DEBUG){
-                    System.out.println("i="+index+", outcome="+outcome);
-                }
+//                if(this.depth==0 && DEBUG){
+//                    System.out.println("i="+index+", outcome="+outcome);
+//                }
 
                 //Unset the move - use of XOR rather than OR guarantees toggling in either direction
                 setMove(thisBit, polarity);
@@ -161,16 +172,16 @@ public class TeachTacToe {
         //If there is a winner, the game is over
         for(int pattern : winningPatterns){
             if((pattern & xMoves)==pattern){
-                if(depth<= 0 && DEBUG){
-                    System.out.println("WINNER1");
-                }
+//                if(depth<= 0 && DEBUG){
+//                    System.out.println("WINNER1");
+//                }
                 winner = 1;
                 return true;
             }
             else if((pattern & oMoves)==pattern){
-                if(depth<= 0 && DEBUG){
-                    System.out.println("WINNER-1");
-                }
+//                if(depth<= 0 && DEBUG){
+//                    System.out.println("WINNER-1");
+//                }
                 winner = -1;
                 return true;
             }

@@ -10,7 +10,7 @@ public class StringGenerator {
     private Random rand;
     private int count;
 
-    private static List<Integer> weights = new ArrayList<>();
+    private static List<Integer> data = new ArrayList<>();
     private static List<Integer> binoperators = new ArrayList<>();
     private static List<Integer> unoperators = new ArrayList<>();
     private static String[] binopStrings = {"&","^","|","+","-","*","/","@"};
@@ -44,7 +44,7 @@ public class StringGenerator {
         for(String label : dataStrings){
             bitMap.put(binLabel, label);
             stringMap.put(label, binLabel);
-            weights.add(binLabel);
+            data.add(binLabel);
             binLabel -= 1;
         }
     }
@@ -110,19 +110,29 @@ public class StringGenerator {
     }
 
     public void num(Stack<Integer> il){
-        il.add(getRandomWeight());
+        il.add(getRandomData());
     }
 
     //Helpers
-    public int getRandomWeight(){
-        return weights.get(rand.nextInt(weights.size()));
+    public int getRandomMutation(int selection){
+        if(selection < 1){
+            return getRandomData();
+        }
+        else if(selection < 2){
+            return getRandomBinop();
+        }
+        return getRandomUnop();
     }
 
-    public int getRandomBinop(){
+    private int getRandomData(){
+        return data.get(rand.nextInt(data.size()));
+    }
+
+    private int getRandomBinop(){
         return binoperators.get(rand.nextInt(binoperators.size()));
     }
 
-    public int getRandomUnop(){
+    private int getRandomUnop(){
         return unoperators.get(rand.nextInt(unoperators.size()));
     }
 
