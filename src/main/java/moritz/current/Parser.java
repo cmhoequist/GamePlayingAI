@@ -52,7 +52,7 @@ public class Parser {
                     int d2 = evaluateRPN(instructions);
                     int d1 = evaluateRPN(instructions);
                     if(binopLookup(bits) == null){
-                        System.out.println(StringGenerator.getBitMap().get(bits)+" ("+bits+"): NULL");
+                        System.out.println(Utility.opcodeToLabel(bits)+" ("+bits+"): NULL");
                     }
                     return binopLookup(bits).invoke(d1, d2);
                 }

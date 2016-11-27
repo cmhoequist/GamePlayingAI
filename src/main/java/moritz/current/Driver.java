@@ -15,18 +15,17 @@ public class Driver {
     }
 
     public static void geneticAlg(){
+        int cohortSize = 50;
+        GeneticAlgorithm.getPopulation(cohortSize, 20, 3);
 
-        Generator sg = new Generator(); //Must initialize before parser (included in TTT)
-        GeneticAlgorithm.getPopulation(100, 20, 3);
-
-        for(int i = 0; i < 0; i++){
+        for(int i = 0; i < 5; i++){
             GeneticAlgorithm.evaluatePopulation();
-            GeneticAlgorithm.evolvePopulation(sg);
+            GeneticAlgorithm.evolvePopulation();
         }
 
         GeneticAlgorithm.evaluatePopulation();
         System.out.print("Algorithms: ");
-        for(double i = 0 ; i < 100; i++){
+        for(double i = 0 ; i < cohortSize; i++){
             GeneticAlgorithm.getSampleChromosome(i).stream().forEach(e -> System.out.print(Utility.opcodeToLabel(e)+" "));
             System.out.println();
         }

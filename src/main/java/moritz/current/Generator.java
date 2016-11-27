@@ -98,25 +98,4 @@ public class Generator {
     public void bitunop(Stack<Integer> il){
         il.add(Utility.getRandomBitunop());
     }
-
-    //Helpers
-    public int getRandomMutation(){
-        int selection = rand.nextInt(6);
-        if(selection==0){
-            return Utility.getRandomNumData();
-        }
-        else if(selection==1){
-            return Utility.getRandomBinop();
-        }
-        else if(selection==2){
-            return Utility.getRandomUnop();
-        }
-        else if(selection==3){
-            return Utility.getRandomBitData();
-        }
-        else if(selection==4){
-            return Utility.getRandomBitunop();
-        }
-        return Utility.getRandomBitnop();
-    }
 }

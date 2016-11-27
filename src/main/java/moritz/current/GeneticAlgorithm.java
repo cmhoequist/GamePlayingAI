@@ -23,7 +23,7 @@ public class GeneticAlgorithm {
 
     private static Map<Double, Stack<Integer>> population = new HashMap<>();
     private static Map<Double, Integer> weights = new HashMap<>();
-    private static int maxMatchScore = 4; //2 for a win, 1 for a tie, 0 for a loss. Match = 2 rounds.
+    private static int maxMatchScore = 6; //3 for a win, 1 for a tie, 0 for a loss. Match = 2 rounds.
     private static Random rand;
     private static int rouletteCounter = 0;
     private static final double crossoverRate = 0.5;
@@ -73,8 +73,8 @@ public class GeneticAlgorithm {
             System.out.println("Evaluating chromosomes.....");
         }
         for(double i = 0.0; i < population.size(); i++){
-            matchScore = 0;
             for(double j = i+1; j < population.size(); j++){
+                matchScore = 0;
                 matchScore += ttt.teach(population.get(i), population.get(j));
                 matchScore += ttt.teach(population.get(j), population.get(i));
                 weights.put(i, weights.get(i)+matchScore);
@@ -89,7 +89,7 @@ public class GeneticAlgorithm {
         }
     }
 
-    public static void evolvePopulation(Generator seed){
+    public static void evolvePopulation(){
         Map<Double, Stack<Integer>> newPopulation = new HashMap<>();
         if(DEBUG){
             System.out.println("Evolving population.....");
@@ -103,7 +103,8 @@ public class GeneticAlgorithm {
             //Crossover
             int limit = Math.min(fit1.size(), fit2.size());
             for(int i = 0; i < limit; i++){
-                if(rand.nextInt(10) < new Double(crossoverRate *10).intValue()){
+                //Assume crossover likelihood is gated by probability of two chromosomes having same opcode type at the same position
+                if(Utility.getCategory(fit1.get(i)) == Utility.getCategory(fit2.get(i))){
                     int temp = fit1.get(i);
                     fit1.set(i, fit2.get(i));
                     fit2.set(i, temp);
@@ -113,12 +114,12 @@ public class GeneticAlgorithm {
             //Mutate
             for(int i = 0; i < fit1.size(); i++){
                 if(rand.nextInt(1000) < new Double(mutationRate*1000).intValue()){
-                    fit1.set(i, seed.getRandomMutation());
+                    fit1.set(i, Utility.getRandomMutation(fit1.get(i)));
                 }
             }
             for(int i = 0; i < fit2.size(); i++){
                 if(rand.nextInt(1000) < new Double(mutationRate*1000).intValue()){
-                    fit2.set(i, seed.getRandomMutation());
+                    fit2.set(i, Utility.getRandomMutation(fit2.get(i)));
                 }
             }
 
@@ -126,9 +127,6 @@ public class GeneticAlgorithm {
             newKey += 1;
             newPopulation.put(newKey, fit2);
             newKey += 1;
-            if(DEBUG){
-                System.out.println("Pair filtered through.");
-            }
         }
 
         population = newPopulation;

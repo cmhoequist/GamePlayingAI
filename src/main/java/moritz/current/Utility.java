@@ -9,9 +9,10 @@ import java.util.*;
 public abstract class Utility {
     private static Random rand;
 
-    //String token to int mapping & int to string token mapping
+    //Conversion mapping
     private static Map<Integer, String> bitMap = new HashMap<>();
     private static Map<String, Integer> stringMap = new HashMap<>();
+    private static Map<Integer, Integer> categoryMap = new HashMap<>();
 
     //Sets of valid tokens
     private static List<Integer> numData = new ArrayList<>();
@@ -47,24 +48,24 @@ public abstract class Utility {
         rand = new Random();
         int binLabel = terminateInstruction - 1;
         for(String label : binopStrings){
-            binLabel = updateTables(binLabel, label, binoperators);
+            binLabel = updateTables(binLabel, label, binoperators, 0);
         }
         for(String label : bitnopStrings){
-            binLabel = updateTables(binLabel, label, bitnoperators);
+            binLabel = updateTables(binLabel, label, bitnoperators, 1);
         }
         maxUnop = binLabel;
         for(String label : unopStrings){
-            binLabel = updateTables(binLabel, label, unoperators);
+            binLabel = updateTables(binLabel, label, unoperators, 2);
         }
         for(String label : bitunopStrings){
-            binLabel = updateTables(binLabel, label, bitunoperators);
+            binLabel = updateTables(binLabel, label, bitunoperators, 3);
         }
         maxData = binLabel;
         for(String label : numDataStrings){
-            binLabel = updateTables(binLabel, label, numData);
+            binLabel = updateTables(binLabel, label, numData, 4);
         }
         for(String label : bitDataStrings){
-            binLabel = updateTables(binLabel, label, bitData);
+            binLabel = updateTables(binLabel, label, bitData, 5);
         }
 
         binopTable.put(stringMap.get("&"), (playerBits, refBits) -> refBits & playerBits);
@@ -82,9 +83,10 @@ public abstract class Utility {
         }
     }
 
-    private static int updateTables(int binLabel, String label, List<Integer> elementList){
+    private static int updateTables(int binLabel, String label, List<Integer> elementList, int category){
         bitMap.put(binLabel, label);
         stringMap.put(label, binLabel);
+        categoryMap.put(binLabel, category);
         elementList.add(binLabel);
         return binLabel - 1;
     }
@@ -116,6 +118,32 @@ public abstract class Utility {
     }
 
     //Random getters
+
+    /**
+     * Returns a random mutation (opcode) of the same category as the input gene.
+     * @param opcode
+     * @return
+     */
+    public static int getRandomMutation(int opcode){
+        int selection = getCategory(opcode);
+        if(selection==0){
+            return Utility.getRandomBinop();
+        }
+        else if(selection==1){
+             return Utility.getRandomBitnop();
+        }
+        else if(selection==2){
+            return Utility.getRandomUnop();
+        }
+        else if(selection==3){
+            return Utility.getRandomBitunop();
+        }
+        else if(selection==4){
+            return Utility.getRandomNumData();
+        }
+        return Utility.getRandomBitData();
+    }
+
     public static int getRandomNumData(){
         return numData.get(rand.nextInt(numData.size()));
     }
@@ -150,6 +178,10 @@ public abstract class Utility {
     }
 
     //Type checkers
+    public static int getCategory(int opcode){
+        return categoryMap.get(opcode);
+    }
+
     public static boolean isData(int element){
         return element <= maxData;
     }
