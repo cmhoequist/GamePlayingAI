@@ -1,6 +1,4 @@
-package moritz;
-
-import org.apache.hadoop.yarn.webapp.hamlet.HamletSpec;
+package moritz.experimental;
 
 import java.util.Arrays;
 import java.util.Scanner;
@@ -8,10 +6,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Created by Moritz on 11/22/2016.
+ * Created by Moritz on 11/26/2016.
  * <p></p>
  */
-public class Sandbox {
+public class BinMax {
     private int[] patterns = {
             0b111000000, 0b000111000, 0b000000111, // rows
             0b100100100, 0b010010010, 0b001001001, // cols
