@@ -18,7 +18,7 @@ public class Driver {
 
     public static void geneticAlg(){
         int cohortSize = 1000;
-        int generations = 150;
+        int generations = 100;
         GeneticAlgorithm.getPopulation(cohortSize, 20, 3);
 
         for(int i = 0; i < generations; i++){
@@ -40,7 +40,16 @@ public class Driver {
 
         Map<Integer,Stack<Integer>> writeAlgs = GeneticAlgorithm.getWeightedChromosomes();
         Utility.writeToFile("algs.txt",writeAlgs);
-
+        System.out.println("Maxes 15------------------");
+        GeneticAlgorithm.maxalgs.entrySet().stream()
+                .sorted((e1, e2) -> Double.compare(e2.getKey(), e1.getKey()))
+                .limit(15)
+                .forEach(e -> {
+                    System.out.print("K: "+e.getKey());
+                    System.out.print(", ");
+                    e.getValue().forEach(v -> System.out.print(Utility.opcodeToLabel(v)+" "));
+                    System.out.println();
+                });
     }
 
     public static void testManual(){

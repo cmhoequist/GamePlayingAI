@@ -31,8 +31,10 @@ public abstract class GeneticAlgorithm {
     private static int populationSize;
     private static boolean DEBUG = true;
     private static int generationTracker = 0;
-    private static int evalThreshold = 10;
+    private static int evalThreshold = 20;
     private static int targetInstructionLength;
+    private static int max = 0;
+    public static Map<Integer, Stack<Integer>> maxalgs = new HashMap<>();
 
     /**
      * Returns a map of chromosomes. Key values are used for weight lookup.
@@ -75,13 +77,15 @@ public abstract class GeneticAlgorithm {
             System.out.println("Evaluating chromosomes.....");
         }
         for(double i = 0.0; i < population.size(); i++){
-            for(double j = i+1; j < evalThreshold; j++){
-                double randOpp = new Double(rand.nextInt(population.size()));
+            for(double j = i+1; j < evalThreshold && j < population.size(); j++){
                 matchScore = 0;
-                matchScore += ttt.teach(population.get(i), population.get(randOpp));
-                matchScore += ttt.teach(population.get(randOpp), population.get(i));
+                matchScore += ttt.teach(population.get(i), population.get(j));
+                matchScore += ttt.teach(population.get(j), population.get(i));
                 weights.put(i, weights.get(i)+matchScore);
-                weights.put(randOpp, weights.get(randOpp)+(maxMatchScore - matchScore));
+            }
+            if(weights.get(i) > max){
+                max = weights.get(i);
+                maxalgs.put(max, population.get(i));
             }
         }
         if(DEBUG){
@@ -128,6 +132,7 @@ public abstract class GeneticAlgorithm {
 
         population = newPopulation;
         generationTracker += 1;
+        weights.entrySet().forEach(e -> weights.put(e.getKey(), 0));
         if(DEBUG){
             System.out.println("Population evolved. Child generation #"+generationTracker+"\n");
         }
