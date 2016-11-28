@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.BitSet;
 
 /**
  * Created by Moritz on 11/28/2016.
@@ -27,9 +28,9 @@ public class C4UI extends JFrame{
     // Matrix
     final private int[][] tileMatrix;
 
-    // turn = 0 - Player 1
-    // turn = 1 - PLayer 2 or AI
-    private int turn = 0;
+    // turn = 1 - Player 1
+    // turn = -1 - PLayer 2 or AI
+    private int turn = 1;
 
     // When moves are 9, game over
     private int moves = 0;
@@ -125,8 +126,8 @@ public class C4UI extends JFrame{
             tiles[x][0].setFocusPainted(false);
             final int i = x;
             tiles[x][0].addActionListener(e ->{
-                tiles[i][heightIndex[i]].setText(turn == 0 ? "X" : "O");
-                tileMatrix[i][heightIndex[i]] = (turn == 0 ? 1 : -1);
+                tiles[i][heightIndex[i]].setText(turn == 1 ? "X" : "O");
+                tileMatrix[i][heightIndex[i]] = (turn);
                 heightIndex[i] -= 1;
                 if(heightIndex[i] == 0){
                     tiles[i][0].setEnabled(false);
@@ -199,12 +200,39 @@ public class C4UI extends JFrame{
     }
 
     private void checkWin() {
-        turn = (turn == 0 ? 1 : 0);
+        long bits = 0;
+
+        for(int i = rows; i >= 1; i--){
+            for(int j = cols; j > 0; j--){
+                //Only need to check winner for current turn
+                if(tileMatrix[cols-j][rows-i+1]==turn){
+                    int num = rows*(j-1)+(i-1);
+                    bits += new Double(Math.pow(2.0, num)).longValue();
+                }
+            }
+
+
+        }
+        long winString;
+        int[] winShifts = { 1, //vertical
+                            5, //diagonal /
+                            6, //horizontal
+                            7 //diagonal \
+                          };
+
+        for(int shift : winShifts){
+            winString = bits & (bits >> shift);
+            if ((winString & (winString >> 2 * shift)) != 0) {
+                System.out.println(turn+" WINS on shift " + shift);
+            }
+        }
+
+        turn = (turn == 1 ? -1 : 1);
     }
 
     private void newGame() {
         moves = 0;
-        if (turn == 0) {
+        if (turn == 1) {
             titleLBL.setText("Player 1 - X");
         } else {
             titleLBL.setText("Player 2 - O");
@@ -220,7 +248,7 @@ public class C4UI extends JFrame{
             }
         }
 
-        if(mode == 1 && turn == 1)
+        if(mode == 1 && turn == -1)
         {
             aiMove();
         }
@@ -243,8 +271,8 @@ public class C4UI extends JFrame{
             {
                 timer.stop();
                 int[] aiMove = aiPlayer.move(tileMatrix);
-                tiles[aiMove[0]][aiMove[1]].setText(turn == 0 ? "X" : "O");
-                tileMatrix[aiMove[0]][aiMove[1]] = (turn == 0 ? 1 : -1);
+                tiles[aiMove[0]][aiMove[1]].setText(turn == 1 ? "X" : "O");
+                tileMatrix[aiMove[0]][aiMove[1]] = (turn);
                 if (moves != 10) {
                     moves += 1;
                 }
