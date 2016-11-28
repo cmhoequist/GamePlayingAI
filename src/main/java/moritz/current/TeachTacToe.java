@@ -149,7 +149,6 @@ public class TeachTacToe {
 
     private int score(){
         int totalScore = 0;
-        Parser parser = new Parser();
         for(int pattern : winningPatterns){
             scorer.setWinPattern(pattern);
             if(currentPolarity == 1){

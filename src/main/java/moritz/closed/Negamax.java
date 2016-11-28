@@ -120,11 +120,14 @@ public class Negamax {
         int totalScore = 0;
 
         for(int pattern : winningPatterns){
-            int playerBits = pattern & player;
-            int opponentBits = pattern & opponent;
-            int bitDifference = Integer.bitCount(playerBits) - Integer.bitCount(opponentBits);
-            int score = bitDifference*new Double(Math.pow(10, Math.abs(bitDifference))).intValue();
-            totalScore += score;
+            //If the pattern is still in play
+            if((pattern & (player | opponent)) != 0){
+                int playerBits = pattern & player;
+                int opponentBits = pattern & opponent;
+                int bitDifference = Integer.bitCount(playerBits) - Integer.bitCount(opponentBits);
+                int score = bitDifference*new Double(Math.pow(10, Math.abs(bitDifference))).intValue();
+                totalScore += score;
+            }
         }
         return totalScore;
     }
