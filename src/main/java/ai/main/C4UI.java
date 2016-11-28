@@ -1,5 +1,7 @@
 package ai.main;
 
+import org.apache.hadoop.yarn.webapp.hamlet.HamletSpec;
+
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
@@ -20,6 +22,7 @@ public class C4UI extends JFrame{
 
     // Tiles as buttons
     private JButton[][] tiles;
+    private int[] heightIndex;
 
     // Matrix
     final private int[][] tileMatrix;
@@ -66,14 +69,25 @@ public class C4UI extends JFrame{
 
         aiPlayer = new GeneticPlayer();
 
-
-        tileMatrix = new int[rows][cols];
+        tileMatrix = new int[cols][rows+1];
+        heightIndex = new int[cols];
         timer = new Timer(500, timerAction);
+    }
+
+    private void addButtonIcons(){
+        Image downArrow = new ImageIcon("down1.png").getImage();
+        int w, h;
+        for(int i = 0; i < cols; i++){
+            w = tiles[i][0].getPreferredSize().width;
+            h = tiles[i][0].getPreferredSize().height*3;
+            Icon icon = new ImageIcon(downArrow.getScaledInstance(w, h, java.awt.Image.SCALE_SMOOTH));
+            tiles[i][0].setIcon(icon);
+        }
     }
 
     //Add components to Container pane
     private void addComponentsToPane(final Container pane) {
-//----------------------JPanels----------------------------------
+    //----------------------JPanels----------------------------------
         Font contactfont = new Font("SansSerif", Font.BOLD, 18);
         titleLBL.setFont(contactfont);
 
@@ -87,17 +101,16 @@ public class C4UI extends JFrame{
         winsPanel.add(xWinsLBL);
         winsPanel.add(oWinsLBL);
 
-        final JPanel game = new JPanel(new GridLayout(rows, cols));
-
         //actions JPanel
         final JPanel actions = new JPanel();
         actions.setLayout(windowLayout);
         actions.setBorder(new TitledBorder(""));
 
         JPanel innerPanel = new JPanel(new BorderLayout());
-        innerPanel.add(titlePanel, BorderLayout.CENTER);
-        innerPanel.add(winsPanel, BorderLayout.SOUTH);
+        innerPanel.add(titlePanel, BorderLayout.NORTH);
+        innerPanel.add(winsPanel, BorderLayout.CENTER);
 
+        final JPanel game = new JPanel(new GridLayout(rows+1, cols));
 
 //----------------------JButtons--------------------------------------------------
         JButton quitButton = new JButton("Quit");
@@ -105,41 +118,36 @@ public class C4UI extends JFrame{
         newGameButton.setFocusPainted(false);
         quitButton.setFocusPainted(false);
 
-        tiles = new JButton[rows][cols];
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
+        tiles = new JButton[cols][rows+1];
 
-                tiles[i][j] = new JButton();
-                tiles[i][j].setText("");
-                tiles[i][j].setVisible(true);
-                tiles[i][j].setFocusPainted(false);
-                tiles[i][j].setBackground(Color.WHITE);
-                tiles[i][j].setFont(new Font("Arial", Font.PLAIN, 40));
-
-                game.add(tiles[i][j]);
-                final int finalI = i;
-                final int finalJ = j;
-                tiles[i][j].addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        if(mode == 1 && turn == 1)
-                        {
-                            return;
-                        }
-                        tiles[finalI][finalJ].setText(turn == 0 ? "X" : "O");
-                        tiles[finalI][finalJ].setEnabled(false);
-                        tileMatrix[finalI][finalJ] = (turn == 0 ? 1 : -1);
-                        if (moves != 10) {
-                            moves += 1;
-                        }
-//                        checkGame();
-                    } // End actionPerformed
-                }); // End addActionListener
+        for(int x = 0; x < cols; x++){
+            tiles[x][0] = new JButton();
+            tiles[x][0].setFocusPainted(false);
+            final int i = x;
+            tiles[x][0].addActionListener(e ->{
+                tiles[i][heightIndex[i]].setText(turn == 0 ? "X" : "O");
+                tileMatrix[i][heightIndex[i]] = (turn == 0 ? 1 : -1);
+                heightIndex[i] -= 1;
+                if(heightIndex[i] == 0){
+                    tiles[i][0].setEnabled(false);
+                }
+                checkWin();
+            });
+            game.add(tiles[x][0]);
+            heightIndex[x] = rows;
+        }
+        for(int y = 1; y < rows+1; y++){
+            for(int x = 0; x < cols; x++){
+                tiles[x][y] = new JButton();
+                tiles[x][y].setVisible(true);
+                tiles[x][y].setFocusPainted(false);
+                tiles[x][y].setBackground(Color.WHITE);
+                tiles[x][y].setFont(new Font("Arial", Font.PLAIN, 40));
+                tiles[x][y].setEnabled(false);
+                game.add(tiles[x][y]);
             }
         }
-
-
 //--------------------------Radio Buttons-----------------------
-
         JRadioButton pvpButton = new JRadioButton("P1 vs P2");
         pvpButton.setSelected(true);
         pvpButton.setFocusPainted(false);
@@ -162,15 +170,12 @@ public class C4UI extends JFrame{
         radioGroup.add(pvpButton);
         radioGroup.add(aiButton);
 
-
 //--------------Add components to JPanels-----------------------
-
         //Add action buttons
         actions.add(pvpButton);
         actions.add(aiButton);
         actions.add(newGameButton);
         actions.add(quitButton);
-
 
         //Add sections / JPanels to main pane
         pane.add(innerPanel, BorderLayout.NORTH);
@@ -178,7 +183,6 @@ public class C4UI extends JFrame{
         pane.add(actions, BorderLayout.SOUTH);
 
 //--------------Add ActionListeners to JButtons-----------------------
-
         //Quit button
         quitButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -192,7 +196,10 @@ public class C4UI extends JFrame{
                 newGame();
             } // End actionPerformed
         }); // End addActionListener
+    }
 
+    private void checkWin() {
+        turn = (turn == 0 ? 1 : 0);
     }
 
     private void newGame() {
@@ -203,12 +210,10 @@ public class C4UI extends JFrame{
             titleLBL.setText("Player 2 - O");
         }
 
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-
+        for (int i = 1; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
                 tileMatrix[i][j] = 0;
                 tiles[i][j].setText("");
-                tiles[i][j].setEnabled(true);
                 tiles[i][j].setBackground(Color.WHITE);
                 tiles[i][j].setForeground(Color.BLACK);
                 tiles[i][j].setOpaque(true);
@@ -239,7 +244,6 @@ public class C4UI extends JFrame{
                 timer.stop();
                 int[] aiMove = aiPlayer.move(tileMatrix);
                 tiles[aiMove[0]][aiMove[1]].setText(turn == 0 ? "X" : "O");
-                tiles[aiMove[0]][aiMove[1]].setEnabled(false);
                 tileMatrix[aiMove[0]][aiMove[1]] = (turn == 0 ? 1 : -1);
                 if (moves != 10) {
                     moves += 1;
@@ -274,13 +278,13 @@ public class C4UI extends JFrame{
 
     static void createAndShowGUI() {
         //Create and set up a new T3UI
-        C4UI frame = new C4UI("Connect Four", 7 , 6);
+        C4UI frame = new C4UI("Connect Four", 6, 7);
 
         //Exit on close
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         //Setup list of images for frame's icons
-        final ArrayList<Image> icons = new ArrayList<Image>();
+        final ArrayList<Image> icons = new ArrayList<>();
         icons.add(new ImageIcon("Images/icon1616.png").getImage());
         icons.add(new ImageIcon("Images/icon3232.png").getImage());
         icons.add(new ImageIcon("Images/icon128128.png").getImage());
@@ -293,6 +297,7 @@ public class C4UI extends JFrame{
         frame.addComponentsToPane(frame.getContentPane());
         //Display the window.
         frame.pack();
+        frame.addButtonIcons();
 
         //Show the T3UI
         frame.setSize(700, 700);

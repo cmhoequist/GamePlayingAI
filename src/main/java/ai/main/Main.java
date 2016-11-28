@@ -6,7 +6,7 @@ package ai.main;
 public class Main {
 
     public static void main(String[] args){
-        T3UI.createAndShowGUI();
+//        T3UI.createAndShowGUI();
         C4UI.createAndShowGUI();
     }
 }
