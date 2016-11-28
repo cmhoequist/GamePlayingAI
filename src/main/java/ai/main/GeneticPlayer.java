@@ -5,4 +5,8 @@ package ai.main;
  * <p></p>
  */
 public class GeneticPlayer implements AIPlayer {
+    @Override
+    public int[] move(int[][] tileMatrix) {
+        return new int[0];
+    }
 }
