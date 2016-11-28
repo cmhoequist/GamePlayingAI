@@ -200,6 +200,7 @@ public class C4UI extends JFrame{
     }
 
     private void checkWin() {
+        moves += 1;
         long bits = 0;
 
         for(int i = rows; i >= 1; i--){
@@ -220,11 +221,19 @@ public class C4UI extends JFrame{
                             7 //diagonal \
                           };
 
+        boolean gameOver =false;
         for(int shift : winShifts){
             winString = bits & (bits >> shift);
             if ((winString & (winString >> 2 * shift)) != 0) {
-                System.out.println(turn+" WINS on shift " + shift);
+                gameOver = true;
+                titleLBL.setText(turn+" WINS on shift " + shift);
             }
+        }
+
+        // All moves and no wins
+        if (moves >= cols*rows && !gameOver) {
+            gameOver = true;
+            titleLBL.setText("Draw!");
         }
 
         turn = (turn == 1 ? -1 : 1);
@@ -290,7 +299,6 @@ public class C4UI extends JFrame{
         for (int i = 0; i < 3; i++) {
             tiles[tileX[i]][tileY[i]].setBackground(Color.CYAN);
             tiles[tileX[i]][tileY[i]].setOpaque(true);
-
         }
     }
 
