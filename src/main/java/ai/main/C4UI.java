@@ -1,14 +1,11 @@
 package ai.main;
 
-import org.apache.hadoop.yarn.webapp.hamlet.HamletSpec;
-
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.BitSet;
 
 /**
  * Created by Moritz on 11/28/2016.
@@ -279,7 +276,7 @@ public class C4UI extends JFrame{
             if(duration == 0)
             {
                 timer.stop();
-                int[] aiMove = aiPlayer.move(tileMatrix);
+                int[] aiMove = aiPlayer.move(tileMatrix, turn);
                 tiles[aiMove[0]][aiMove[1]].setText(turn == 1 ? "X" : "O");
                 tileMatrix[aiMove[0]][aiMove[1]] = (turn);
                 if (moves != 10) {

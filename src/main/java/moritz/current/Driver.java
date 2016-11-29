@@ -18,12 +18,22 @@ public class Driver {
 
     public static void geneticAlg(){
         int cohortSize = 1000;
-        int generations = 100;
+        int generations = 5;
         GeneticAlgorithm.getPopulation(cohortSize, 20, 3);
 
+        Stack<Integer> initialBest = new Stack<>();
+        String str2 = "playermap wpattern ^ bitcount oppmap";
+        String[] labels2 = str2.split(" ");
+        for(String label : labels2){
+            initialBest.add(Utility.labelToOpcode(label));
+        }
+        TeachTacToe ttt = new TeachTacToe(true);
         for(int i = 0; i < generations; i++){
             GeneticAlgorithm.evaluatePopulation();
             GeneticAlgorithm.evolvePopulation();
+            Stack<Integer> newBest = GeneticAlgorithm.getBest();
+            ttt.teach(initialBest, newBest);
+            initialBest = newBest;
         }
 
         GeneticAlgorithm.evaluatePopulation();
@@ -62,7 +72,7 @@ public class Driver {
         String[] labels1 = str1.split(" ");
         String[] labels2 = str2.split(" ");
         for(String label : labels1){
-            System.out.println("Symbol: "+label);
+//            System.out.println("Symbol: "+label);
             example1.add(Utility.labelToOpcode(label));
         }
         for(String label : labels2){

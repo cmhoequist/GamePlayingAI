@@ -1,5 +1,7 @@
 package moritz.current;
 
+import ai.main.T3UI;
+
 import java.util.Arrays;
 import java.util.Set;
 import java.util.Stack;
@@ -10,9 +12,19 @@ import java.util.stream.Collectors;
  * <p></p>
  */
 public class TeachTacToe {
+    private boolean display = false;
     private int winner = 0;
     Parser scorer = new Parser();
     Stack<Integer> alg1, alg2;
+    private T3UI t;
+
+    public TeachTacToe(boolean doIt){
+        this();
+        display = doIt;
+        if(display){
+            t = new T3UI("Tic Tac Toe");
+        }
+    }
 
     /**
      * Returns 2 if alg1 won, 1 if tie, and 0 if alg1 lost.
@@ -21,6 +33,7 @@ public class TeachTacToe {
      * @return
      */
     public int teach(Stack<Integer> alg1, Stack<Integer> alg2){
+
         clearState();
         this.alg1 = alg1;
         this.alg2 = alg2;
@@ -34,9 +47,13 @@ public class TeachTacToe {
             negamax(currentPolarity, 2);
             setMove(getBinaryIndex(8- ultimateChoice), currentPolarity);
             if(DEBUG){
-                System.out.println(currentPolarity +" moves to "+ ultimateChoice);
-                System.out.println(currentPolarity+": "+ Integer.toBinaryString(currentPolarity==1 ? xMoves : oMoves));
+//                System.out.println(currentPolarity +" moves to "+ ultimateChoice);
+//                System.out.println(currentPolarity+": "+ Integer.toBinaryString(currentPolarity==1 ? xMoves : oMoves));
             }
+            if(display){
+                t.setMove(ultimateChoice, currentPolarity);
+            }
+
 
             currentPolarity *= -1;
         }
@@ -44,6 +61,15 @@ public class TeachTacToe {
         //Reset for winner determination
         winner = 0;
         isOver();
+        if(display){
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            t.getResetButton().doClick();
+        }
+
 
         currentPolarity *= -1;
         if(winner == 0){

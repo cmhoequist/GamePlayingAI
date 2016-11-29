@@ -49,17 +49,43 @@ public class T3UI extends JFrame {
     private JLabel xWinsLBL = new JLabel("X : 0");
     private JLabel oWinsLBL = new JLabel("     O : 0");
 
+    //Button
+    private JButton newGameButton;
+
     // Constructor for T3UI
-    private T3UI(String name) {
+    public T3UI(String name) {
         //Inherits name from JFrame
-        super(name);
-
-
+        setTitle(name);
         aiPlayer = new GeneticPlayer();
-
 
         tileMatrix = new int[3][3];
         timer = new Timer(500, timerAction);
+
+//        //Create and set up a new T3UI
+//        T3UI frame = new T3UI("Tic-Tac-Toe");
+
+        //Exit on close
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        //Setup list of images for frame's icons
+        final ArrayList<Image> icons = new ArrayList<Image>();
+        icons.add(new ImageIcon("Images/icon1616.png").getImage());
+        icons.add(new ImageIcon("Images/icon3232.png").getImage());
+        icons.add(new ImageIcon("Images/icon128128.png").getImage());
+
+        //Add Icons to frame
+        setIconImages(icons);
+        //Set location by platform
+        setLocationByPlatform(true);
+        //Set up the content pane.
+        addComponentsToPane(getContentPane());
+        //Display the window.
+        pack();
+
+        //Show the T3UI
+        setSize(350, 350);
+        setVisible(true);
+        setResizable(false);
     }
 
     //Add components to Container pane
@@ -97,7 +123,7 @@ public class T3UI extends JFrame {
 //----------------------JButtons--------------------------------------------------
 
         JButton quitButton = new JButton("Quit");
-        JButton newGameButton = new JButton("New Game");
+        newGameButton = new JButton("New Game");
         newGameButton.setFocusPainted(false);
         quitButton.setFocusPainted(false);
 
@@ -189,6 +215,10 @@ public class T3UI extends JFrame {
             } // End actionPerformed
         }); // End addActionListener
 
+    }
+
+    public JButton getResetButton(){
+        return newGameButton;
     }
 
     private void newGame() {
@@ -355,6 +385,25 @@ public class T3UI extends JFrame {
         }
     }
 
+    //For hacky use with TTT
+    public void setMove(int num, int polarity){
+        try {
+            Thread.sleep(180);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        int row = num/3;
+        int col = num%3;
+
+        tiles[row][col].setText(polarity == 1 ? "X" : "O");
+        tiles[row][col].setEnabled(false);
+        tileMatrix[row][col] = (polarity == 1 ? 1 : -1);
+        if (moves != 10) {
+            moves += 1;
+        }
+        checkGame();
+    }
+
     private void aiMove()
     {
         titleLBL.setText("AI thinking...");
@@ -371,7 +420,7 @@ public class T3UI extends JFrame {
             if(duration == 0)
             {
                 timer.stop();
-                int[] aiMove = aiPlayer.move(tileMatrix);
+                int[] aiMove = aiPlayer.move(tileMatrix, turn);
                 tiles[aiMove[0]][aiMove[1]].setText(turn == 0 ? "X" : "O");
                 tiles[aiMove[0]][aiMove[1]].setEnabled(false);
                 tileMatrix[aiMove[0]][aiMove[1]] = (turn == 0 ? 1 : -1);
@@ -407,30 +456,5 @@ public class T3UI extends JFrame {
     }
 
     static void createAndShowGUI() {
-        //Create and set up a new T3UI
-        T3UI frame = new T3UI("Tic-Tac-Toe");
-
-        //Exit on close
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        //Setup list of images for frame's icons
-        final ArrayList<Image> icons = new ArrayList<Image>();
-        icons.add(new ImageIcon("Images/icon1616.png").getImage());
-        icons.add(new ImageIcon("Images/icon3232.png").getImage());
-        icons.add(new ImageIcon("Images/icon128128.png").getImage());
-
-        //Add Icons to frame
-        frame.setIconImages(icons);
-        //Set location by platform
-        frame.setLocationByPlatform(true);
-        //Set up the content pane.
-        frame.addComponentsToPane(frame.getContentPane());
-        //Display the window.
-        frame.pack();
-
-        //Show the T3UI
-        frame.setSize(350, 350);
-        frame.setVisible(true);
-        frame.setResizable(false);
     } // createAndShowGUI
 } // End T3UI

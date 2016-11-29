@@ -5,5 +5,5 @@ package ai.main;
  * <p></p>
  */
 public interface AIPlayer {
-    int[] move(int[][] tileMatrix);
+    int[] move(int[][] tileMatrix, int turnPolarity);
 }
