@@ -73,7 +73,7 @@ public class C4UI extends JFrame{
     }
 
     private void addButtonIcons(){
-        Image downArrow = new ImageIcon("down1.png").getImage();
+        Image downArrow = new ImageIcon("src/main/resources/down1.png").getImage();
         int w, h;
         for(int i = 0; i < cols; i++){
             w = tiles[i][0].getPreferredSize().width;

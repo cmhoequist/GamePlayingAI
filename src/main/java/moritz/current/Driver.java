@@ -49,7 +49,7 @@ public class Driver {
                 });
 
         Map<Integer,Stack<Integer>> writeAlgs = GeneticAlgorithm.getWeightedChromosomes();
-        Utility.writeToFile("algs.txt",writeAlgs);
+        Utility.writeToFile("src/main/resources/algs.txt",writeAlgs);
         System.out.println("Maxes 15------------------");
         GeneticAlgorithm.maxalgs.entrySet().stream()
                 .sorted((e1, e2) -> Double.compare(e2.getKey(), e1.getKey()))
