@@ -8,39 +8,19 @@
     <artifactId>GamePlayingAI</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <packaging>jar</packaging>
+    <name>GamePlayingAI</name>
+
     <properties>
         <!-- Generic properties -->
+        <jdk.version>1.8</jdk.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.test.failure.ignore>true</maven.test.failure.ignore>
 
-        <!-- Mahout -->
-        <mahout.version>0.12.2</mahout.version>
-
     </properties>
-
-    <dependencies>
-        <!-- https://mvnrepository.com/artifact/org.apache.mahout/mahout-core -->
-        <dependency>
-            <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-core</artifactId>
-            <version>0.9.0.2.1.7.0-784</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-math</artifactId>
-            <version>${mahout.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.mahout</groupId>
-            <artifactId>mahout-integration</artifactId>
-            <version>${mahout.version}</version>
-        </dependency>
-    </dependencies>
 
     <build>
         <plugins>
@@ -52,6 +32,7 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 
