@@ -1,5 +1,8 @@
 package ai.main;
 
+import ai.main.ai.view.FooterPanel;
+import ai.main.ai.view.HeaderPanel;
+
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
@@ -44,13 +47,10 @@ public class T3UI extends JFrame {
     // Timer duration
     private int duration;
 
-    // Labels
-    private JLabel titleLBL = new JLabel("Player 1 - X");
-    private JLabel xWinsLBL = new JLabel("X : 0");
-    private JLabel oWinsLBL = new JLabel("     O : 0");
+    //Top level components
+    HeaderPanel headerPanel = new HeaderPanel();
+    FooterPanel footerPanel = new FooterPanel();
 
-    //Button
-    private JButton newGameButton;
 
     // Constructor for T3UI
     public T3UI(String name) {
@@ -60,9 +60,6 @@ public class T3UI extends JFrame {
 
         tileMatrix = new int[3][3];
         timer = new Timer(500, timerAction);
-
-//        //Create and set up a new T3UI
-//        T3UI frame = new T3UI("Tic-Tac-Toe");
 
         //Exit on close
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -93,40 +90,9 @@ public class T3UI extends JFrame {
 
 
 //----------------------JPanels----------------------------------
-
-
-        Font contactfont = new Font("SansSerif", Font.BOLD, 18);
-        titleLBL.setFont(contactfont);
-
-        final JPanel titlePanel = new JPanel();
-        titlePanel.setLayout(windowLayout);
-        titlePanel.add(titleLBL);
-
-        final JPanel winsPanel = new JPanel();
-        winsPanel.setLayout(windowLayout);
-        winsPanel.setBorder(new TitledBorder(""));
-        winsPanel.add(xWinsLBL);
-        winsPanel.add(oWinsLBL);
-
         final JPanel game = new JPanel(new GridLayout(3, 3));
 
-        //actions JPanel
-        final JPanel actions = new JPanel();
-        actions.setLayout(windowLayout);
-        actions.setBorder(new TitledBorder(""));
-
-        JPanel innerPanel = new JPanel(new BorderLayout());
-        innerPanel.add(titlePanel, BorderLayout.CENTER);
-        innerPanel.add(winsPanel, BorderLayout.SOUTH);
-
-
 //----------------------JButtons--------------------------------------------------
-
-        JButton quitButton = new JButton("Quit");
-        newGameButton = new JButton("New Game");
-        newGameButton.setFocusPainted(false);
-        quitButton.setFocusPainted(false);
-
         tiles = new JButton[3][3];
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
@@ -159,74 +125,30 @@ public class T3UI extends JFrame {
             }
         }
 
-
-//--------------------------Radio Buttons-----------------------
-
-        JRadioButton pvpButton = new JRadioButton("P1 vs P2");
-        pvpButton.setSelected(true);
-        pvpButton.setFocusPainted(false);
-        pvpButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                mode = 0;
-            }
-        });
-
-        JRadioButton aiButton = new JRadioButton("P1 vs AI");
-        pvpButton.setFocusPainted(false);
-        aiButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                mode = 1;
-            }
-        });
-
-        //Group the radio buttons.
-        ButtonGroup radioGroup = new ButtonGroup();
-        radioGroup.add(pvpButton);
-        radioGroup.add(aiButton);
-
-
 //--------------Add components to JPanels-----------------------
 
-        //Add action buttons
-        actions.add(pvpButton);
-        actions.add(aiButton);
-        actions.add(newGameButton);
-        actions.add(quitButton);
-
-
         //Add sections / JPanels to main pane
-        pane.add(innerPanel, BorderLayout.NORTH);
+        pane.add(headerPanel, BorderLayout.NORTH);
         pane.add(game, BorderLayout.CENTER);
-        pane.add(actions, BorderLayout.SOUTH);
+        pane.add(footerPanel, BorderLayout.SOUTH);
 
-//--------------Add ActionListeners to JButtons-----------------------
-
-        //Quit button
-        quitButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            } // End actionPerformed
-        }); // End addActionListener
-
-        //New game button
-        newGameButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                newGame();
-            } // End actionPerformed
-        }); // End addActionListener
-
+        //Add listeners to buttons
+        footerPanel.getPvpButton().addActionListener(e -> mode = 0);
+        footerPanel.getAiButton().addActionListener(e -> mode = 1);
+        footerPanel.getQuitButton().addActionListener(e -> System.exit(0)); // End addActionListener
+        footerPanel.getNewGameButton().addActionListener(e -> newGame()); // End addActionListener
     }
 
     public JButton getResetButton(){
-        return newGameButton;
+        return footerPanel.getNewGameButton();
     }
 
     private void newGame() {
         moves = 0;
         if (turn == 0) {
-            titleLBL.setText("Player 1 - X");
+            headerPanel.setHeader("Player 1 - X");
         } else {
-            titleLBL.setText("Player 2 - O");
+            headerPanel.setHeader("Player 2 - O");
         }
 
         for (int i = 0; i < 3; i++) {
@@ -253,12 +175,12 @@ public class T3UI extends JFrame {
         // 1st row
         if ((tileMatrix[0][0] + tileMatrix[0][1] + tileMatrix[0][2]) == -3) {
             gameOver = true;
-            titleLBL.setText("Player 2 - O Wins!");
+            headerPanel.setHeader("Player 2 - O Wins!");
             addOWinCount();
             colorWinningTiles(new int[]{0, 0, 0}, new int[]{0, 1, 2});
         } else if ((tileMatrix[0][0] + tileMatrix[0][1] + tileMatrix[0][2]) == 3) {
             gameOver = true;
-            titleLBL.setText("Player 1 - X Wins!");
+            headerPanel.setHeader("Player 1 - X Wins!");
             addXWinCount();
             colorWinningTiles(new int[]{0, 0, 0}, new int[]{0, 1, 2});
         }
@@ -266,12 +188,12 @@ public class T3UI extends JFrame {
         // 2nd row
         else if ((tileMatrix[1][0] + tileMatrix[1][1] + tileMatrix[1][2]) == -3) {
             gameOver = true;
-            titleLBL.setText("Player 2 - O Wins!");
+            headerPanel.setHeader("Player 2 - O Wins!");
             addOWinCount();
             colorWinningTiles(new int[]{1, 1, 1}, new int[]{0, 1, 2});
         } else if ((tileMatrix[1][0] + tileMatrix[1][1] + tileMatrix[1][2]) == 3) {
             gameOver = true;
-            titleLBL.setText("Player 1 - X Wins!");
+            headerPanel.setHeader("Player 1 - X Wins!");
             addXWinCount();
             colorWinningTiles(new int[]{1, 1, 1}, new int[]{0, 1, 2});
         }
@@ -279,12 +201,12 @@ public class T3UI extends JFrame {
         // 3rd row
         else if ((tileMatrix[2][0] + tileMatrix[2][1] + tileMatrix[2][2]) == -3) {
             gameOver = true;
-            titleLBL.setText("Player 2 - O Wins!");
+            headerPanel.setHeader("Player 2 - O Wins!");
             addOWinCount();
             colorWinningTiles(new int[]{2, 2, 2}, new int[]{0, 1, 2});
         } else if ((tileMatrix[2][0] + tileMatrix[2][1] + tileMatrix[2][2]) == 3) {
             gameOver = true;
-            titleLBL.setText("Player 1 - X Wins!");
+            headerPanel.setHeader("Player 1 - X Wins!");
             addXWinCount();
             colorWinningTiles(new int[]{2, 2, 2}, new int[]{0, 1, 2});
         }
@@ -292,12 +214,12 @@ public class T3UI extends JFrame {
         // 1st column
         else if ((tileMatrix[0][0] + tileMatrix[1][0] + tileMatrix[2][0]) == -3) {
             gameOver = true;
-            titleLBL.setText("Player 2 - O Wins!");
+            headerPanel.setHeader("Player 2 - O Wins!");
             addOWinCount();
             colorWinningTiles(new int[]{0, 1, 2}, new int[]{0, 0, 0});
         } else if ((tileMatrix[0][0] + tileMatrix[1][0] + tileMatrix[2][0]) == 3) {
             gameOver = true;
-            titleLBL.setText("Player 1 - X Wins!");
+            headerPanel.setHeader("Player 1 - X Wins!");
             addXWinCount();
             colorWinningTiles(new int[]{0, 1, 2}, new int[]{0, 0, 0});
         }
@@ -305,12 +227,12 @@ public class T3UI extends JFrame {
         // 2nd column
         else if ((tileMatrix[0][1] + tileMatrix[1][1] + tileMatrix[2][1]) == -3) {
             gameOver = true;
-            titleLBL.setText("Player 2 - O Wins!");
+            headerPanel.setHeader("Player 2 - O Wins!");
             addOWinCount();
             colorWinningTiles(new int[]{0, 1, 2}, new int[]{1, 1, 1});
         } else if ((tileMatrix[0][1] + tileMatrix[1][1] + tileMatrix[2][1]) == 3) {
             gameOver = true;
-            titleLBL.setText("Player 1 - X Wins!");
+            headerPanel.setHeader("Player 1 - X Wins!");
             addXWinCount();
             colorWinningTiles(new int[]{0, 1, 2}, new int[]{1, 1, 1});
         }
@@ -318,12 +240,12 @@ public class T3UI extends JFrame {
         // 3rd column
         else if ((tileMatrix[0][2] + tileMatrix[1][2] + tileMatrix[2][2]) == -3) {
             gameOver = true;
-            titleLBL.setText("Player 2 - O Wins!");
+            headerPanel.setHeader("Player 2 - O Wins!");
             addOWinCount();
             colorWinningTiles(new int[]{0, 1, 2}, new int[]{2, 2, 2});
         } else if ((tileMatrix[0][2] + tileMatrix[1][2] + tileMatrix[2][2]) == 3) {
             gameOver = true;
-            titleLBL.setText("Player 1 - X Wins!");
+            headerPanel.setHeader("Player 1 - X Wins!");
             addXWinCount();
             colorWinningTiles(new int[]{0, 1, 2}, new int[]{2, 2, 2});
         }
@@ -331,12 +253,12 @@ public class T3UI extends JFrame {
         // 1st cross
         else if ((tileMatrix[0][0] + tileMatrix[1][1] + tileMatrix[2][2]) == -3) {
             gameOver = true;
-            titleLBL.setText("Player 2 - O Wins!");
+            headerPanel.setHeader("Player 2 - O Wins!");
             addOWinCount();
             colorWinningTiles(new int[]{0, 1, 2}, new int[]{0, 1, 2});
         } else if ((tileMatrix[0][0] + tileMatrix[1][1] + tileMatrix[2][2]) == 3) {
             gameOver = true;
-            titleLBL.setText("Player 1 - X Wins!");
+            headerPanel.setHeader("Player 1 - X Wins!");
             addXWinCount();
             colorWinningTiles(new int[]{0, 1, 2}, new int[]{0, 1, 2});
         }
@@ -344,12 +266,12 @@ public class T3UI extends JFrame {
         // 2nd cross
         else if ((tileMatrix[0][2] + tileMatrix[1][1] + tileMatrix[2][0]) == -3) {
             gameOver = true;
-            titleLBL.setText("Player 2 - O Wins!");
+            headerPanel.setHeader("Player 2 - O Wins!");
             addOWinCount();
             colorWinningTiles(new int[]{0, 1, 2}, new int[]{2, 1, 0});
         } else if ((tileMatrix[0][2] + tileMatrix[1][1] + tileMatrix[2][0]) == 3) {
             gameOver = true;
-            titleLBL.setText("Player 1 - X Wins!");
+            headerPanel.setHeader("Player 1 - X Wins!");
             addXWinCount();
             colorWinningTiles(new int[]{0, 1, 2}, new int[]{2, 1, 0});
 
@@ -358,7 +280,7 @@ public class T3UI extends JFrame {
         // All moves and no wins
         if (moves >= 9 && !gameOver) {
             gameOver = true;
-            titleLBL.setText("Draw!");
+            headerPanel.setHeader("Draw!");
         }
 
         // Game Over so disable all button tiles
@@ -373,9 +295,9 @@ public class T3UI extends JFrame {
             turn = (turn == 0 ? 1 : 0);
 
             if (turn == 0) {
-                titleLBL.setText("Player 1 - X");
+                headerPanel.setHeader("Player 1 - X");
             } else {
-                titleLBL.setText("Player 2 - O");
+                headerPanel.setHeader("Player 2 - O");
             }
 
             if(mode == 1 && turn == 1)
@@ -406,7 +328,7 @@ public class T3UI extends JFrame {
 
     private void aiMove()
     {
-        titleLBL.setText("AI thinking...");
+        headerPanel.setHeader("AI thinking...");
         duration = 1;
         timer.start();
         timer.setInitialDelay(0);
@@ -447,14 +369,11 @@ public class T3UI extends JFrame {
 
     private void addXWinCount() {
         xWin += 1;
-        xWinsLBL.setText("X : " + xWin);
+        headerPanel.setXScore("X : " + xWin);
     }
 
     private void addOWinCount() {
         oWin += 1;
-        oWinsLBL.setText("     O : " + oWin);
+        headerPanel.setOScore("     O : " + oWin);
     }
-
-    static void createAndShowGUI() {
-    } // createAndShowGUI
 } // End T3UI

@@ -221,6 +221,7 @@ public class C4UI extends JFrame{
         boolean gameOver =false;
         for(int shift : winShifts){
             winString = bits & (bits >> shift);
+            //Re !=0; excessive matching (5-in-a-row) can occur, or perfect match (1 bit remaining) may occur but not in last bit
             if ((winString & (winString >> 2 * shift)) != 0) {
                 gameOver = true;
                 titleLBL.setText(turn+" WINS on shift " + shift);

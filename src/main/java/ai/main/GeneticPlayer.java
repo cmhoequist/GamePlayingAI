@@ -1,12 +1,14 @@
 package ai.main;
 
+import ai.main.ai.view.GamePanel;
 import moritz.current.Parser;
+import moritz.current.Utility;
 
 /**
  * Created by Moritz on 11/28/2016.
  * <p></p>
  */
-public class GeneticPlayer implements AIPlayer {
+public class GeneticPlayer extends AIPlayer {
     private int depth = 0;
     private int ultimateChoice = -1;
 
@@ -28,11 +30,11 @@ public class GeneticPlayer implements AIPlayer {
 //
 //    }
 //
-//    private int getBinaryIndex(int index){
+//    private int getBinaryPattern(int index){
 //        return new Double(Math.pow(2, index)).intValue();
 //    }
 //
-//    private int score(){
+//    public int score(GamePanel game){
 //        int totalScore = 0;
 //        for(int pattern : winningPatterns){
 //            scorer.setWinPattern(pattern);
@@ -49,47 +51,66 @@ public class GeneticPlayer implements AIPlayer {
 //        return totalScore;
 //    }
 //
-//    private int negamax(int polarity, int depth){
-//        this.depth += 1;
-//
-//        if(isOver() || depth==0){
-//            this.depth -= 1;
+
+    long posMoves = 0;
+    long negMoves = 0;
+    long movesToEvaluate = 0;
+    GamePanel game;
+
+    /**
+     * Toggles bit rather than simple set.
+     * @param thisBit
+     * @param polarity
+     */
+    private void setMove(long thisBit, int polarity){
+        if(polarity == 1){
+            posMoves ^= thisBit;
+        }
+        else{
+            negMoves ^= thisBit;
+        }
+    }
+
+    private int getMove(GamePanel game){
+        this.game = game;
+        posMoves = game.getPosMoves();
+        negMoves = game.getNegMoves();
+        movesToEvaluate = game.getAvailableMoves();
+        return negamax(game.getTurn(), 2);
+    }
+    private int negamax(int polarity, int maxDepth){
+        this.depth += 1;
+
+        if(game.isOver(posMoves, negMoves) || maxDepth==0){
+            this.depth -= 1;
 //            return score();
-//        }
-//
-//        int max = Integer.MIN_VALUE;
-//        int depthChoice = -1;
-//
-//        //Get board configuration
-//        int occupied = xMoves | oMoves;
-//        //For all potential moves
-//        for(int i = 0; i < 9; i++){
-//            //If the cell is empty (the move is valid)
-//            if((occupied >> i & 1) != 1){
-//                //We iterate from LSB to MSB, but the grid indices are mapped from MSB to LSB: must reverse
-//                int index = 8 - i;
-//                int thisBit = getBinaryIndex(i);
-//
-//                //Make a move to create a transient board state (the next recursive level)
-//                setMove(thisBit, polarity);
-//
-//                //Evaluate the move
-//                int outcome = -negamax(-1*polarity, depth-1);
-//                if(outcome > max){
-//                    max = outcome;
-//                    depthChoice = index;
-//                }
-//
-////                if(this.depth==0 && DEBUG){
-////                    System.out.println("i="+index+", outcome="+outcome);
-////                }
-//
-//                //Unset the move - use of XOR rather than OR guarantees toggling in either direction
-//                setMove(thisBit, polarity);
-//            }
-//        }
-//        ultimateChoice = depthChoice;
-//        this.depth -= 1;
-//        return max;
-//    }
+        }
+
+        int max = Integer.MIN_VALUE;
+        int depthChoice = -1;
+
+        long move;
+        for(int i = 0; i < Long.SIZE; i++){
+            //Get the bit pattern representing this move
+            move = Utility.getBinaryPattern(i);
+            //Check whether it's a valid move
+            if((movesToEvaluate & move)==1){
+                //Make a move to create a transient board state (the next recursive level)
+                setMove(move, polarity);
+            }
+
+            //Evaluate the move
+            int outcome = -negamax(-1*polarity, maxDepth-1);
+            if(outcome > max){
+                max = outcome;
+                //We iterate from LSB to MSB, but the grid indices are mapped from MSB to LSB: must reverse
+                depthChoice = game.boardSize()-1-i;
+            }
+        }
+
+        //Set final choice and return
+        ultimateChoice = depthChoice;
+        this.depth -= 1;
+        return max;
+    }
 }

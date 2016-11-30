@@ -265,4 +265,9 @@ public abstract class Utility {
     public static boolean isBitData(int unknown){
         return bitData.contains(unknown);
     }
+
+    //Pure utility methods
+    public static long getBinaryPattern(int index){
+        return new Double(Math.pow(2, index)).longValue();
+    }
 }
