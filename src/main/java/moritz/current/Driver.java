@@ -18,7 +18,7 @@ public class Driver {
 
     public static void geneticAlg(){
         int cohortSize = 1000;
-        int generations = 5;
+        int generations = 4;
         GeneticAlgorithm.getPopulation(cohortSize, 20, 3);
 
         Stack<Integer> initialBest = new Stack<>();
@@ -28,40 +28,47 @@ public class Driver {
             initialBest.add(Utility.labelToOpcode(label));
         }
         TeachTacToe ttt = new TeachTacToe(true);
-        TC4 tc4 = new TC4(true);
         for(int i = 0; i < generations; i++){
             GeneticAlgorithm.evaluatePopulation();
             GeneticAlgorithm.evolvePopulation();
             Stack<Integer> newBest = GeneticAlgorithm.getBest();
-//            ttt.teach(initialBest, newBest);
+            ttt.teach(initialBest, newBest);
+            initialBest = newBest;
+        }
+        TC4 tc4 = new TC4(true);
+        for(int i = 0; i < 3; i++){
+            GeneticAlgorithm.evaluatePopulation();
+            GeneticAlgorithm.evolvePopulation();
+            Stack<Integer> newBest = GeneticAlgorithm.getBest();
             tc4.teach(initialBest, newBest);
             initialBest = newBest;
         }
+        System.exit(0);
 
-        GeneticAlgorithm.evaluatePopulation();
-        System.out.println("Best 15--------------------");
-        GeneticAlgorithm.getWeightedChromosomes().entrySet().stream()
-                .sorted((e1, e2) -> Double.compare(e2.getKey(), e1.getKey()))
-                .limit(15)
-                .forEach(e -> {
-                   System.out.print("K: "+e.getKey());
-                    System.out.print(", ");
-                    e.getValue().forEach(v -> System.out.print(Utility.opcodeToLabel(v)+" "));
-                    System.out.println();
-                });
-
-        Map<Integer,Stack<Integer>> writeAlgs = GeneticAlgorithm.getWeightedChromosomes();
-        Utility.writeToFile("src/main/resources/algs.txt",writeAlgs);
-        System.out.println("Maxes 15------------------");
-        GeneticAlgorithm.maxalgs.entrySet().stream()
-                .sorted((e1, e2) -> Double.compare(e2.getKey(), e1.getKey()))
-                .limit(15)
-                .forEach(e -> {
-                    System.out.print("K: "+e.getKey());
-                    System.out.print(", ");
-                    e.getValue().forEach(v -> System.out.print(Utility.opcodeToLabel(v)+" "));
-                    System.out.println();
-                });
+//        GeneticAlgorithm.evaluatePopulation();
+//        System.out.println("Best 15--------------------");
+//        GeneticAlgorithm.getWeightedChromosomes().entrySet().stream()
+//                .sorted((e1, e2) -> Double.compare(e2.getKey(), e1.getKey()))
+//                .limit(15)
+//                .forEach(e -> {
+//                   System.out.print("K: "+e.getKey());
+//                    System.out.print(", ");
+//                    e.getValue().forEach(v -> System.out.print(Utility.opcodeToLabel(v)+" "));
+//                    System.out.println();
+//                });
+//
+//        Map<Integer,Stack<Integer>> writeAlgs = GeneticAlgorithm.getWeightedChromosomes();
+//        Utility.writeToFile("src/main/resources/algs.txt",writeAlgs);
+//        System.out.println("Maxes 15------------------");
+//        GeneticAlgorithm.maxalgs.entrySet().stream()
+//                .sorted((e1, e2) -> Double.compare(e2.getKey(), e1.getKey()))
+//                .limit(15)
+//                .forEach(e -> {
+//                    System.out.print("K: "+e.getKey());
+//                    System.out.print(", ");
+//                    e.getValue().forEach(v -> System.out.print(Utility.opcodeToLabel(v)+" "));
+//                    System.out.println();
+//                });
     }
 
     public static void testManual(){

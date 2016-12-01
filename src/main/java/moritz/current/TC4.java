@@ -100,7 +100,7 @@ public class TC4 {
             }
             if(display){
                 try {
-                    Thread.sleep(180);
+                    Thread.sleep(80);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -115,7 +115,7 @@ public class TC4 {
         isOver();
         if(display){
             try {
-                Thread.sleep(180);
+                Thread.sleep(150);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

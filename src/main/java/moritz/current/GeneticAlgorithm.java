@@ -29,7 +29,7 @@ public abstract class GeneticAlgorithm {
     private static final double crossoverRate = 0.5;
     private static final double mutationRate = 0.01;
     private static int populationSize;
-    private static boolean DEBUG = true;
+    private static boolean DEBUG = false;
     private static int generationTracker = 0;
     private static int evalThreshold = 20;
     private static int targetInstructionLength;

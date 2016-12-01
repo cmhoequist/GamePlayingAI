@@ -310,7 +310,7 @@ public class T3UI extends JFrame {
     //For hacky use with TTT
     public void setMove(int num, int polarity){
         try {
-            Thread.sleep(180);
+            Thread.sleep(80);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

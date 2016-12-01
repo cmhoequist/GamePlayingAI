@@ -294,6 +294,11 @@ public class C4UI extends JFrame{
                 else{
                     addOWinCount();
                 }
+                try {
+                    Thread.sleep(800);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 newGame();
             }
         }
@@ -312,6 +317,7 @@ public class C4UI extends JFrame{
 
     private void newGame() {
         moves = 0;
+        turn = 1;
         if (turn == 1) {
             titleLBL.setText("Player 1 - X");
         } else {
