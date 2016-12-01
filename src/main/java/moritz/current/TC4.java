@@ -93,17 +93,12 @@ public class TC4 {
 
         while(!c.isOver()){
             negamax(currentPolarity, 2);
-            System.out.println("Currpat: "+Long.toBinaryString(posMoves | negMoves));
-            System.out.println("nextmove: "+Long.toBinaryString(new Double(Math.pow(2.0,ultimateChoice)).longValue()));
             setMove(ultimateChoice, currentPolarity);
             if(DEBUG){
 //                System.out.println(currentPolarity +" moves to "+ ultimateChoice);
 //                System.out.println(currentPolarity+": "+ Integer.toBinaryString(currentPolarity==1 ? xMoves : oMoves));
             }
             if(display){
-                System.out.println("Next move: "+ultimateChoice);
-                System.out.println(Long.toBinaryString(posMoves));
-                System.out.println(Long.toBinaryString(negMoves));
                 try {
                     Thread.sleep(180);
                 } catch (InterruptedException e) {
@@ -124,7 +119,7 @@ public class TC4 {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            c.getResetButton().doClick();
+//            c.getResetButton().doClick();
         }
 
 

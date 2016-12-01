@@ -5,6 +5,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -251,6 +252,7 @@ public class C4UI extends JFrame{
             winString = bits & (bits >> shift);
             //Re !=0; excessive matching (5-in-a-row) can occur, or perfect match (1 bit remaining) may occur but not in last bit
             if ((winString & (winString >> 2 * shift)) != 0) {
+                checkWin();
                 return true;
             }
         }
@@ -332,7 +334,6 @@ public class C4UI extends JFrame{
                 tileMatrix[i][j] = 0;
             }
         }
-        System.out.println("MOVES:"+moves);
         if(mode == 1 && turn == -1)
         {
             aiMove();
