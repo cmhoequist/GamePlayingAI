@@ -14,6 +14,9 @@ public class ToeUI extends GamePanel {
     private JButton[] cells = new JButton[3*3];
 
     public ToeUI(){
+        for(int i =0 ;i < cells.length; i++){
+            cells[i] = new JButton();
+        }
         reset();
     }
 

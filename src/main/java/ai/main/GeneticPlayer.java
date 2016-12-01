@@ -4,6 +4,8 @@ import ai.main.ai.view.GamePanel;
 import moritz.current.Parser;
 import moritz.current.Utility;
 
+import java.util.Stack;
+
 /**
  * Created by Moritz on 11/28/2016.
  * <p></p>
@@ -18,39 +20,9 @@ public class GeneticPlayer extends AIPlayer {
         Parser scorer = new Parser();
         scorer.setOpponentState(1);
         scorer.setPlayerState(1);
-        scorer.setWinPattern(1);
+//        scorer.setWinPattern(1);
         return new int[0];
     }
-//
-//    public void setMove(Game game){
-//        Parser scorer = new Parser();
-//        int polarity = game.getTurn();
-//        int playerMap = game.getPlayerMap();
-//        int oppMap = game.getOppMap();
-//
-//    }
-//
-//    private int getBinaryPattern(int index){
-//        return new Double(Math.pow(2, index)).intValue();
-//    }
-//
-//    public int score(GamePanel game){
-//        int totalScore = 0;
-//        for(int pattern : winningPatterns){
-//            scorer.setWinPattern(pattern);
-//            if(currentPolarity == 1){
-//                scorer.setPlayerState(xMoves);
-//                scorer.setOpponentState(oMoves);
-//            }
-//            else{
-//                scorer.setPlayerState(oMoves);
-//                scorer.setOpponentState(xMoves);
-//            }
-//            totalScore += scorer.score(currentPolarity == 1 ? alg1 : alg2);
-//        }
-//        return totalScore;
-//    }
-//
 
     long posMoves = 0;
     long negMoves = 0;
@@ -71,19 +43,45 @@ public class GeneticPlayer extends AIPlayer {
         }
     }
 
-    private int getMove(GamePanel game){
+    public int getMove(GamePanel game){
         this.game = game;
         posMoves = game.getPosMoves();
         negMoves = game.getNegMoves();
         movesToEvaluate = game.getAvailableMoves();
         return negamax(game.getTurn(), 2);
     }
+
+    Stack<Integer> alg1, alg2;
+    public void setAlgorithm(Stack<Integer> alg, Stack<Integer> alg2){
+        alg1 = alg;
+        this.alg2 = alg;
+    }
+
+    Parser scorer = new Parser();
+    private int score(int currentPolarity){
+        int totalScore = 0;
+        //Win dimensions
+        for(int i = 0; i < 3; i++){
+            if(currentPolarity == 1){
+                scorer.setPlayerState(posMoves);
+                scorer.setOpponentState(negMoves);
+            }
+            else{
+                scorer.setPlayerState(posMoves);
+                scorer.setOpponentState(negMoves);
+            }
+            totalScore += scorer.score(currentPolarity == 1 ? alg1 : alg2);
+        }
+        return totalScore;
+    }
+
     private int negamax(int polarity, int maxDepth){
         this.depth += 1;
 
         if(game.isOver(posMoves, negMoves) || maxDepth==0){
             this.depth -= 1;
-//            return score();
+            //Polarity has been preset to the next turn after the last: we are currently scoring the last turn.
+            return score(polarity*-1);
         }
 
         int max = Integer.MIN_VALUE;

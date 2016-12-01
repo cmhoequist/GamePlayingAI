@@ -12,17 +12,17 @@ public class Parser {
     public Parser(){
     }
 
-    public void setPlayerState(int pat){
+    public void setPlayerState(long pat){
         Utility.setPlayerState(pat);
     }
 
-    public void setOpponentState(int pat){
+    public void setOpponentState(long pat){
         Utility.setOpponentState(pat);
     }
 
-    public void setWinPattern(int pat){
-        Utility.setWinPattern(pat);
-    }
+//    public void setWinPattern(int pat){
+//        Utility.setWinPattern(pat);
+//    }
 
     Stack<Integer> consumed = new Stack<>();
     public int score(Stack<Integer> instructions){
@@ -42,7 +42,7 @@ public class Parser {
             //If not no-op
             if(bits < 0b11111){
                 if(Utility.isData(bits)){
-                    return dataLookup(bits);
+                    return new Long(dataLookup(bits)).intValue();
                 }
                 else if(Utility.isUnop(bits)){
                     int data = evaluateRPN(instructions);
@@ -77,7 +77,7 @@ public class Parser {
         return Utility.getUnop(bits);
     }
 
-    private int dataLookup(int bits) {
+    private long dataLookup(int bits) {
         return Utility.getData(bits);
     }
 

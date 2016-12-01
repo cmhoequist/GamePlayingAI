@@ -51,4 +51,12 @@ public class Controller extends JFrame {
         headerPanel.setHeader("Player 1 - X");
         gamePanel.reset();
     }
+
+    public GamePanel getGame(){
+        return gamePanel;
+    }
+
+    public void setMove(int m){
+        gamePanel.setMove(m, gamePanel.getTurn());
+    }
 }

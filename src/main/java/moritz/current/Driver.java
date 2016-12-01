@@ -22,17 +22,19 @@ public class Driver {
         GeneticAlgorithm.getPopulation(cohortSize, 20, 3);
 
         Stack<Integer> initialBest = new Stack<>();
-        String str2 = "playermap wpattern ^ bitcount oppmap";
+        String str2 = "playermap oppmap ^ bitcount oppmap";
         String[] labels2 = str2.split(" ");
         for(String label : labels2){
             initialBest.add(Utility.labelToOpcode(label));
         }
         TeachTacToe ttt = new TeachTacToe(true);
+        TC4 tc4 = new TC4(true);
         for(int i = 0; i < generations; i++){
             GeneticAlgorithm.evaluatePopulation();
             GeneticAlgorithm.evolvePopulation();
             Stack<Integer> newBest = GeneticAlgorithm.getBest();
-            ttt.teach(initialBest, newBest);
+//            ttt.teach(initialBest, newBest);
+            tc4.teach(initialBest, newBest);
             initialBest = newBest;
         }
 

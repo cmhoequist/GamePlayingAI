@@ -6,6 +6,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Moritz on 11/28/2016.
@@ -57,10 +58,12 @@ public class C4UI extends JFrame{
     private int rows;
     private int cols;
 
+    private JButton newGameButton;
+
     // Constructor for T3UI
-    private C4UI(String name, int rows, int cols) {
+    public C4UI(String name, int rows, int cols) {
         //Inherits name from JFrame
-        super(name);
+        setTitle(name);
 
         this.rows = rows;
         this.cols = cols;
@@ -70,6 +73,30 @@ public class C4UI extends JFrame{
         tileMatrix = new int[cols][rows+1];
         heightIndex = new int[cols];
         timer = new Timer(500, timerAction);
+
+        //Exit on close
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        //Setup list of images for frame's icons
+        final ArrayList<Image> icons = new ArrayList<>();
+        icons.add(new ImageIcon("Images/icon1616.png").getImage());
+        icons.add(new ImageIcon("Images/icon3232.png").getImage());
+        icons.add(new ImageIcon("Images/icon128128.png").getImage());
+
+        //Add Icons to frame
+        setIconImages(icons);
+        //Set location by platform
+        setLocationByPlatform(true);
+        //Set up the content pane.
+        addComponentsToPane(getContentPane());
+        //Display the window.
+        pack();
+        addButtonIcons();
+
+        //Show the T3UI
+        setSize(700, 700);
+        setVisible(true);
+        setResizable(false);
     }
 
     private void addButtonIcons(){
@@ -112,7 +139,7 @@ public class C4UI extends JFrame{
 
 //----------------------JButtons--------------------------------------------------
         JButton quitButton = new JButton("Quit");
-        JButton newGameButton = new JButton("New Game");
+        newGameButton = new JButton("New Game");
         newGameButton.setFocusPainted(false);
         quitButton.setFocusPainted(false);
 
@@ -129,6 +156,7 @@ public class C4UI extends JFrame{
                 if(heightIndex[i] == 0){
                     tiles[i][0].setEnabled(false);
                 }
+                getValidMoves();
                 checkWin();
             });
             game.add(tiles[x][0]);
@@ -196,6 +224,39 @@ public class C4UI extends JFrame{
         }); // End addActionListener
     }
 
+    public JButton getResetButton(){
+        return newGameButton;
+    }
+
+    public boolean isOver(){
+        long bits = 0;
+
+        for(int i = rows; i >= 1; i--){
+            for(int j = cols; j > 0; j--){
+                //Only need to check winner for current turn
+                if(tileMatrix[cols-j][rows-i+1]==turn){
+                    int num = rows*(j-1)+(i-1);
+                    bits += new Double(Math.pow(2.0, num)).longValue();
+                }
+            }
+        }
+        long winString;
+        int[] winShifts = { 1, //vertical
+                5, //diagonal /
+                6, //horizontal
+                7 //diagonal \
+        };
+
+        for(int shift : winShifts){
+            winString = bits & (bits >> shift);
+            //Re !=0; excessive matching (5-in-a-row) can occur, or perfect match (1 bit remaining) may occur but not in last bit
+            if ((winString & (winString >> 2 * shift)) != 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void checkWin() {
         moves += 1;
         long bits = 0;
@@ -225,16 +286,26 @@ public class C4UI extends JFrame{
             if ((winString & (winString >> 2 * shift)) != 0) {
                 gameOver = true;
                 titleLBL.setText(turn+" WINS on shift " + shift);
+                if(turn==1){
+                    addXWinCount();
+                }
+                else{
+                    addOWinCount();
+                }
+                newGame();
             }
         }
 
-        // All moves and no wins
-        if (moves >= cols*rows && !gameOver) {
-            gameOver = true;
-            titleLBL.setText("Draw!");
+        if(!gameOver){
+            // All moves and no wins
+            if (moves >= cols*rows && !gameOver) {
+                gameOver = true;
+                titleLBL.setText("Draw!");
+            }
+
+            turn = (turn == 1 ? -1 : 1);
         }
 
-        turn = (turn == 1 ? -1 : 1);
     }
 
     private void newGame() {
@@ -245,16 +316,23 @@ public class C4UI extends JFrame{
             titleLBL.setText("Player 2 - O");
         }
 
-        for (int i = 1; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                tileMatrix[i][j] = 0;
-                tiles[i][j].setText("");
-                tiles[i][j].setBackground(Color.WHITE);
-                tiles[i][j].setForeground(Color.BLACK);
-                tiles[i][j].setOpaque(true);
+        for(int i = 0; i < cols; i++){
+            heightIndex[i] = rows;
+            tiles[i][0].setEnabled(true);
+        }
+
+        for(int y = 1; y < rows+1; y++){
+            for(int x = 0; x < cols; x++){
+                tiles[x][y].setText("");
             }
         }
 
+        for(int i = 0; i < tileMatrix.length; i++){
+            for(int j = 0; j < tileMatrix[0].length; j++){
+                tileMatrix[i][j] = 0;
+            }
+        }
+        System.out.println("MOVES:"+moves);
         if(mode == 1 && turn == -1)
         {
             aiMove();
@@ -269,6 +347,27 @@ public class C4UI extends JFrame{
         timer.setInitialDelay(0);
     }
 
+    public List<Integer> getValidMoves(){
+        List<Integer> outcome = new ArrayList<>();
+        for(int i = 0; i < heightIndex.length; i++){
+            if(heightIndex[i] > 0){
+                outcome.add(heightIndex[i]*cols + i);
+            }
+        }
+        return outcome;
+    }
+
+    public void setMove(int move, int polarity){
+        int i = move % cols;
+        tiles[i][heightIndex[i]].setText(polarity == 1 ? "X" : "O");
+        tileMatrix[i][heightIndex[i]] = (polarity);
+        heightIndex[i] -= 1;
+        if(heightIndex[i] == 0){
+            tiles[i][0].setEnabled(false);
+        }
+        checkWin();
+    }
+
     private ActionListener timerAction = new ActionListener()
     {
         @Override
@@ -280,7 +379,8 @@ public class C4UI extends JFrame{
                 int[] aiMove = aiPlayer.move(tileMatrix, turn);
                 tiles[aiMove[0]][aiMove[1]].setText(turn == 1 ? "X" : "O");
                 tileMatrix[aiMove[0]][aiMove[1]] = (turn);
-                if (moves != 10) {
+                if (moves != cols*rows) {
+                    System.out.println("MOVES");
                     moves += 1;
                 }
 //                checkGame();
@@ -310,32 +410,6 @@ public class C4UI extends JFrame{
         oWinsLBL.setText("     O : " + oWin);
     }
 
-    static void createAndShowGUI() {
-        //Create and set up a new T3UI
-        C4UI frame = new C4UI("Connect Four", 6, 7);
 
-        //Exit on close
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        //Setup list of images for frame's icons
-        final ArrayList<Image> icons = new ArrayList<>();
-        icons.add(new ImageIcon("Images/icon1616.png").getImage());
-        icons.add(new ImageIcon("Images/icon3232.png").getImage());
-        icons.add(new ImageIcon("Images/icon128128.png").getImage());
-
-        //Add Icons to frame
-        frame.setIconImages(icons);
-        //Set location by platform
-        frame.setLocationByPlatform(true);
-        //Set up the content pane.
-        frame.addComponentsToPane(frame.getContentPane());
-        //Display the window.
-        frame.pack();
-        frame.addButtonIcons();
-
-        //Show the T3UI
-        frame.setSize(700, 700);
-        frame.setVisible(true);
-        frame.setResizable(false);
-    } // createAndShowGUI
 }

@@ -14,7 +14,8 @@ public abstract class Generator {
     exp -> num | stm tail
     stm -> num exp binop | exp unop
     tail -> exp binop tail | unop tail | eps
-    num -> bits bits bitnop bitunop | numData
+    num -> bits shiftbit bitnop bitunop | numData
+    shiftbit -> bits | bits num shift
      */
     static public void initialize(){
         rand = new Random();
@@ -69,12 +70,17 @@ public abstract class Generator {
             numdata(il);
         }
         else{
-            //Know we want to avoid duplication of bit data
             bits(il);
-            xbits(il, il.peek());
+            shiftbits(il);
             bitnop(il);
             bitunop(il);
         }
+    }
+
+    public static void shiftbits(Stack<Integer> il){
+        bits(il);
+        numdata(il);
+        shiftop(il);
     }
 
     /**
@@ -140,4 +146,5 @@ public abstract class Generator {
         il.add(Utility.getRandomBitunop());
     }
 
+    public static void shiftop(Stack<Integer> il){ il.add(Utility.getRandomShiftop()); }
 }

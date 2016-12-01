@@ -25,12 +25,14 @@ public abstract class Utility {
     private static List<Integer> unoperators = new ArrayList<>();
     private static List<Integer> bitnoperators = new ArrayList<>();
     private static List<Integer> bitunoperators = new ArrayList<>();
+    private static List<Integer> shiftoperators = new ArrayList<>();
     private static String[] binopStrings = {"+","-","*","/","@"};
     private static String[] unopStrings = {"abs"};
     private static String[] bitnopStrings = {"&","^","|"};
+    private static String[] shiftStrings = {"sr"};
     private static String[] bitunopStrings = {"bitcount"};
-    private static String[] numDataStrings = {"maxlinebits","idealscore","2","10"};
-    private static String[] bitDataStrings = {"playermap","oppmap","wpattern"};
+    private static String[] numDataStrings = {"maxlinebits","idealscore","1","2","3,","4","5","6","7","8","9"};
+    private static String[] bitDataStrings = {"playermap","oppmap"};
 
     //Highest instruction (starting point)
     private static int terminateInstruction = 0b11111;
@@ -42,36 +44,47 @@ public abstract class Utility {
     //Parser tables
     private static Map<Integer, BinopMethod> binopTable = new HashMap<>();
     private static Map<Integer, UnopMethod> unopTable = new HashMap<>();
-    private static Map<Integer, Integer> dataTable = new HashMap<>();
+    private static Map<Integer, Long> dataTable = new HashMap<>();
 
     //Sample data for testing/debugging
-    private static String[] dataStrings = {"maxlinebits","idealscore","2","10","playermap","oppmap","wpattern"};
-    private static int[] data = {3, 24, 2, 10, 0b000011100, 0b001100001, 0b111000000};
+    private static long[] data = {3, 24, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0b000011100, 0b001100001};
 
     public static void initialize() {
         rand = new Random();
+        int category = 0;
         int binLabel = terminateInstruction - 1;
+        for(String label : shiftStrings){
+            binLabel = updateTables(binLabel, label, shiftoperators, category);
+            category += 1;
+        }
         for(String label : binopStrings){
-            binLabel = updateTables(binLabel, label, binoperators, 0);
+            binLabel = updateTables(binLabel, label, binoperators, category);
+            category += 1;
         }
         for(String label : bitnopStrings){
-            binLabel = updateTables(binLabel, label, bitnoperators, 1);
+            binLabel = updateTables(binLabel, label, bitnoperators, category);
+            category += 1;
         }
         maxUnop = binLabel;
         for(String label : unopStrings){
-            binLabel = updateTables(binLabel, label, unoperators, 2);
+            binLabel = updateTables(binLabel, label, unoperators, category);
+            category += 1;
         }
         for(String label : bitunopStrings){
-            binLabel = updateTables(binLabel, label, bitunoperators, 3);
+            binLabel = updateTables(binLabel, label, bitunoperators, category);
+            category += 1;
         }
         maxData = binLabel;
         for(String label : numDataStrings){
-            binLabel = updateTables(binLabel, label, numData, 4);
+            binLabel = updateTables(binLabel, label, numData, category);
+            category += 1;
         }
         for(String label : bitDataStrings){
-            binLabel = updateTables(binLabel, label, bitData, 5);
+            binLabel = updateTables(binLabel, label, bitData, category);
+            category += 1;
         }
 
+        binopTable.put(stringMap.get("sr"), (bits, count) -> bits >> count);
         binopTable.put(stringMap.get("&"), (playerBits, refBits) -> refBits & playerBits);
         binopTable.put(stringMap.get("^"), (playerBits, refBits) -> refBits ^ playerBits);
         binopTable.put(stringMap.get("|"), (playerBits, refBits) -> refBits | playerBits);
@@ -82,8 +95,14 @@ public abstract class Utility {
         binopTable.put(stringMap.get("@"), (playerBits, refBits) -> playerBits / (refBits==0 ? 1 : refBits));   //avoid div by 0
         unopTable.put(stringMap.get("bitcount"), (playerBits) -> Integer.bitCount(playerBits));
         unopTable.put(stringMap.get("abs"), (playerBits) -> Math.abs(playerBits));
-        for(int i = 0; i < data.length; i++){
-            dataTable.put(stringMap.get(dataStrings[i]), data[i]);
+
+        int aLen = numDataStrings.length;
+        int bLen = bitDataStrings.length;
+        String[] c= new String[aLen+bLen];
+        System.arraycopy(numDataStrings, 0, c, 0, aLen);
+        System.arraycopy(bitDataStrings, 0, c, aLen, bLen);
+        for(int i = 0; i < c.length; i++){
+            dataTable.put(stringMap.get(c[i]), data[i]);
         }
         Generator.initialize();
     }
@@ -142,20 +161,20 @@ public abstract class Utility {
     }
 
     //Data mutators
-    public static void setPlayerState(int pat){
+    public static void setPlayerState(long pat){
         dataTable.put(Utility.labelToOpcode("playermap"),pat);
     }
 
-    public static void setOpponentState(int pat){
+    public static void setOpponentState(long pat){
         dataTable.put(Utility.labelToOpcode("oppmap"),pat);
     }
 
-    public static void setWinPattern(int pat){
-        dataTable.put(Utility.labelToOpcode("wpattern"),pat);
-    }
+//    public static void setWinPattern(int pat){
+//        dataTable.put(Utility.labelToOpcode("wpattern"),pat);
+//    }
 
     //Deterministic getters
-    public static int getData(int opcode){
+    public static long getData(int opcode){
         return dataTable.get(opcode);
     }
 
@@ -209,6 +228,10 @@ public abstract class Utility {
     public static int getRandomXUnop(int dedup){
         List<Integer> validInts = bitData.stream().filter(e -> e != dedup).collect(Collectors.toList());
         return validInts.size() > 0 ? validInts.get(rand.nextInt(validInts.size())) : 0;
+    }
+
+    public static int getRandomShiftop(){
+        return shiftoperators.get(rand.nextInt(shiftoperators.size()));
     }
 
     public static int getRandomBitData(){

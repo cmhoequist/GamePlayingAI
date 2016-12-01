@@ -176,7 +176,7 @@ public class TeachTacToe {
     private int score(){
         int totalScore = 0;
         for(int pattern : winningPatterns){
-            scorer.setWinPattern(pattern);
+//            scorer.setWinPattern(pattern);
             if(currentPolarity == 1){
                 scorer.setPlayerState(xMoves);
                 scorer.setOpponentState(oMoves);
